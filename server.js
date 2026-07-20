@@ -7,7 +7,7 @@ import morgan from 'morgan';
 import { errorHandler } from "./Middlewares/errorHandler.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.js";
-import dotenv from "dotenv";
+
 dotenv.config();
 
 
