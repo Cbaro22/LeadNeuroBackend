@@ -7,7 +7,7 @@ import morgan from 'morgan';
 import { errorHandler } from "./Middlewares/errorHandler.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.js";
-
+import dotenv from "dotenv";
 dotenv.config();
 
 
@@ -18,7 +18,7 @@ app.use(cors({
     origin: "*"
 }));
 app.use(morgan('dev'))
-app.use('/api', routes)
+app.use('/api/v1', routes)
 app.use(
     "/api-docs",
     swaggerUi.serve,
@@ -37,7 +37,7 @@ app.get("/test", (req, res) => {
 app.get('/', (req, res) =>{
     res.json("Lead Neuro Backend Api is runing....")
 })
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, ()=>{
     console.log(` app is listening at port ${PORT}`)})
     
