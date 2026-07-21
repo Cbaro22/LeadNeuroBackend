@@ -2,6 +2,7 @@ import dotenv from "dotenv"
 import express from "express";
 import dataBase from "./config/db.js";
 import cors from "cors";
+import helmet from "helmet";
 import routes from "./Routes/indexRoute.js";
 import morgan from 'morgan';
 import { errorHandler } from "./Middlewares/errorHandler.js";
@@ -12,11 +13,13 @@ dotenv.config();
 
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({extended:true}))
+app.use(helmet());
 app.use(cors({
     origin: "*"
 }));
+app.use(express.json());
+app.use(express.urlencoded({extended:true}))
+
 app.use(morgan('dev'))
 app.use('/api/v1', routes)
 app.use(

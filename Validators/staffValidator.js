@@ -1,4 +1,4 @@
-import { ExpressValidator } from "express-validator";
+
 import { body } from "express-validator";
 
 export const createStaffValidator = [
