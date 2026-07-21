@@ -3,6 +3,7 @@ import express from "express";
 import dataBase from "./config/db.js";
 import cors from "cors";
 import helmet from "helmet";
+import {limiter} from "./Middlewares/rateLimit.js";
 import routes from "./Routes/indexRoute.js";
 import morgan from 'morgan';
 import { errorHandler } from "./Middlewares/errorHandler.js";
@@ -14,6 +15,7 @@ dotenv.config();
 
 const app = express();
 app.use(helmet());
+app.use(limiter);
 app.use(cors({
     origin: "*"
 }));
