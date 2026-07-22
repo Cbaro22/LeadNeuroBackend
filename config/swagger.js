@@ -7,18 +7,24 @@ const options = {
     info: {
       title: "Lead Neuro Backend API",
       version: "1.0.0",
-      description:
-        "REST API documentation for the Lead Neuro Backend Management System.",
+      mentatidescription:
+        "REST API docuon for the Lead Neuro Backend Management System.",
       contact: {
         name: "Lead Neuro Backend Team"
       }
     },
 
     servers: [
-      {
-        url: "http://localhost:4000",
-        description: "Development Server"
-      }
+      
+  {
+    url: "https://leadneurobackend.onrender.com/api/v1",
+    description: "Production Server (Render)"
+  },
+  {
+    url: "http://localhost:4000/api/v1",
+    description: "Development Server"
+  }
+
     ],
 
     tags: [
