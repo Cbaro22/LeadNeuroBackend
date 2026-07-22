@@ -25,6 +25,15 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}))
 
 app.use(morgan('dev'))
+
+app.get("/api/v1", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Welcome to Lead Neuro Backend API v1",
+        documentation: "https://leadneurobackend.onrender.com/api-docs"
+    });
+});
+
 app.use('/api/v1', routes)
 app.use(
     "/api-docs",
