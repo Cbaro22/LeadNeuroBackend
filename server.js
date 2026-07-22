@@ -11,6 +11,8 @@ import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.js";
 import { passwordLimiter } from "./Middlewares/passwordLimiter.js";
 import { authLimiter } from "./Middlewares/authLimiter.js";
+import corsOptions from "./config/corsOptions.js";
+
 
 dotenv.config();
 
@@ -18,9 +20,7 @@ dotenv.config();
 const app = express();
 app.use(helmet());
 app.use(limiter);
-app.use(cors({
-    origin: "*"
-}));
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
 

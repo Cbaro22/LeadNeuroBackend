@@ -5,14 +5,21 @@ const options = {
     openapi: "3.0.0",
 
     info: {
-      title: "Lead Neuro Backend API",
-      version: "1.0.0",
-      mentatidescription:
-        "REST API docuon for the Lead Neuro Backend Management System.",
-      contact: {
-        name: "Lead Neuro Backend Team"
-      }
-    },
+    title: "Lead Neuro Backend API",
+    version: "1.0.0",
+    description: `
+REST API for Lead Neuro Backend.
+
+Swagger provides interactive API testing.
+
+For complete request examples and collections, see the Postman documentation.
+`
+},
+
+externalDocs: {
+    description: "Complete Postman API Documentation",
+    url: "https://documenter.getpostman.com/view/44317742/2sBY4PPLh6"
+},
 
     servers: [
       
