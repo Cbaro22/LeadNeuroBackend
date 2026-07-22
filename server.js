@@ -3,12 +3,14 @@ import express from "express";
 import dataBase from "./config/db.js";
 import cors from "cors";
 import helmet from "helmet";
-import {limiter} from "./Middlewares/rateLimit.js";
+import {limiter} from "./Middlewares/rateLimiter.js";
 import routes from "./Routes/indexRoute.js";
 import morgan from 'morgan';
 import { errorHandler } from "./Middlewares/errorHandler.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.js";
+import { passwordLimiter } from "./Middlewares/passwordLimiter.js";
+import { authLimiter } from "./Middlewares/authLimiter.js";
 
 dotenv.config();
 

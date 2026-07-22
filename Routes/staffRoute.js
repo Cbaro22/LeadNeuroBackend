@@ -4,6 +4,8 @@ import { authentication } from "../Middlewares/ValidateStaff.js"
 import { handleCreateStaff, handleLoginStaff, handleGetAllStaff, handleForgotPassword, handleGetStaffById, handleResetPassword, handleUpdateStaff, handleDeleteStaff } from "../Controllers/staffCtrls.js"
 import { validate } from "../Validators/validate.js"
 import { createStaffValidator } from "../Validators/staffValidator.js"
+import { authLimiter } from "../Middlewares/authLimiter.js"
+import { passwordLimiter } from "../Middlewares/passwordLimiter.js"
 
  const router = express.Router()
 
@@ -126,7 +128,7 @@ router.post('/register',createStaffValidator,validate, handleCreateStaff)
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/login', handleLoginStaff)
+router.post('/login',authLimiter, handleLoginStaff)
 
 /**
  * @swagger
@@ -216,7 +218,7 @@ router.get('/all_Staff',authentication, Authorization("admin"),handleGetAllStaff
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/Forgot_password', handleForgotPassword)
+router.post('/Forgot_password',passwordLimiter, handleForgotPassword)
 
 
 /**

@@ -241,7 +241,7 @@ File Upload Support
 
 - **Postman Documentation:** https://documenter.getpostman.com/view/44317742/2sBY4PPLh6
 
-- **Swagger UI:** Available locally at `http://localhost:4000/api-docs` after starting the server.
+- **Swagger UI:** Available locally at `https://leadneurobackend.onrender.com/api-docs` after starting the server.
 
 ## Author
 
