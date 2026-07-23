@@ -64,8 +64,8 @@ export const handleCreateStaff = async(req,res,next)=>{
 export const handleGetAllStaff =async(req,res,next)=>{
    try {
 
-const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+const page = Math.max(parseInt(req.query.page) || 1, 1);
+const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
 
         const skip = (page - 1) * limit;
 
