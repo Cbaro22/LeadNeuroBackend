@@ -12,7 +12,6 @@ import swaggerSpec from "./config/swagger.js";
 import { passwordLimiter } from "./Middlewares/passwordLimiter.js";
 import { authLimiter } from "./Middlewares/authLimiter.js";
 import corsOptions from "./config/corsOptions.js";
-import { successResponse, errorResponse } from "./Services/apiResponse.js";
 
 
 dotenv.config();

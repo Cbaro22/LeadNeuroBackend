@@ -149,16 +149,15 @@ try{
 
 
     await loginEmail(staff.email)
-    return successResponse(
-    res,
-    200,
-    "Login successful",
-    {
+    return res.status(200).json({
+    success: true,
+    message: "Login successful",
+    data: {
         staff,
         accessToken,
         refreshToken
     }
-);
+});;
 }catch(error){
     next(error)
 }
