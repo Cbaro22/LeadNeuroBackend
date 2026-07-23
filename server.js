@@ -12,7 +12,7 @@ import swaggerSpec from "./config/swagger.js";
 import { passwordLimiter } from "./Middlewares/passwordLimiter.js";
 import { authLimiter } from "./Middlewares/authLimiter.js";
 import corsOptions from "./config/corsOptions.js";
-import mongoSanitize from "express-mongo-sanitize"
+
 
 
 dotenv.config();
@@ -24,7 +24,6 @@ app.use(limiter);
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
-app.use(mongoSanitize())
 app.use(morgan('dev'))
 
 app.get("/api/v1", (req, res) => {
