@@ -14,7 +14,8 @@ export const createStaffValidator = [
         .trim()
         .isEmail()
         .withMessage("Please provide a valid email")
-        .normalizeEmail(),
+        .normalizeEmail()
+        .isString(),
 
     body("password")
         .isLength({ min: 8 })
