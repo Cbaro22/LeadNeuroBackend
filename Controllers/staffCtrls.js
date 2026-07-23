@@ -9,6 +9,7 @@ import { deleteAccountEmail, forgotPasswordEmail, loginEmail, registerationEmail
 
 import crypto from "crypto"
 import Cleaner from "../Models/Cleaner.js"
+import mongoose from "mongoose"
 
 
 
@@ -42,9 +43,17 @@ export const handleCreateStaff = async(req,res,next)=>{
     }
 
     await registerationEmail(newStaff.email)
-    res.status(201).json({message:"Staff created successfully",
-        staff:newStaff,
-        roleData, AccessToken:generateAccessToken(newStaff), RefreshToken:generateRefreshToken(newStaff)})
+    return successResponse(
+    res,
+    201,
+    "Staff created successfully",
+    {
+        staff: newStaff,
+        roleData,
+        accessToken: generateAccessToken(newStaff),
+        refreshToken: generateRefreshToken(newStaff)
+    }
+);
     } catch (error) {
         next(error)
     }
@@ -53,7 +62,12 @@ export const handleCreateStaff = async(req,res,next)=>{
 export const handleGetAllStaff =async(req,res,next)=>{
    try {
      const staff = await Staff.find()
-    res.status(200).json({message:"Staff retrieved successfully", staff})
+    return successResponse(
+    res,
+    200,
+    "Staff retrieved successfully",
+    staff
+);
    } catch (error) {
     next(error)
    }
@@ -88,10 +102,15 @@ export const handleGetStaffById = async(req,res,next)=>{
          roleData = await Cleaner.findOne({staff:staff._id})
     }
 
-    res.status(200).json({
+    return successResponse(
+    res,
+    200,
+    "Staff retrieved successfully",
+    {
         staff,
         roleData
-    })
+    }
+);
     }catch (error){
         next(error)
         }
@@ -128,7 +147,16 @@ try{
 
 
     await loginEmail(staff.email)
-    res.status(200).json({message:"Login successful",staff, accessToken, refreshToken})
+    return successResponse(
+    res,
+    200,
+    "Login successful",
+    {
+        staff,
+        accessToken,
+        refreshToken
+    }
+);
 }catch(error){
     next(error)
 }
@@ -153,7 +181,14 @@ export const handleForgotPassword = async(req,res, next)=>{
 
     
     await forgotPasswordEmail(staff.email, resetToken)
-    res.status(200).json({message:"Password reset email sent", resetToken})
+    return successResponse(
+    res,
+    200,
+    "Password reset email sent",
+    {
+        resetToken
+    }
+);
     }catch(error){
         next(error)
     }
@@ -189,7 +224,11 @@ export const handleResetPassword = async(req,res, next)=>{
 
 
        await resetPasswordEmail(staff.email)
-        res.status(200).json({message:"Password reset successful"})
+        return successResponse(
+    res,
+    200,
+    "Password reset successful"
+);
 
        }catch(error){
         next(error)
@@ -198,14 +237,16 @@ export const handleResetPassword = async(req,res, next)=>{
 export const handleDeleteStaff = async(req,res, next)=>{
         try{
             const {id} = req.params
-        const staff = await Staff.findById(id) 
-
+        
 
 if (!mongoose.Types.ObjectId.isValid(id)) {
     const error = new Error("Invalid staff ID");
     error.statusCode = 400;
     return next(error);
 }
+
+const staff = await Staff.findById(id) 
+
 
         if(!staff){
             const error = new Error("Staff not found");
@@ -215,17 +256,28 @@ if (!mongoose.Types.ObjectId.isValid(id)) {
         await Staff.findByIdAndDelete(id)
         await deleteAccountEmail(staff.email)
         
-        res.status(200).json({message:"Staff deleted successfully"})
+        return successResponse(
+    res,
+    200,
+    "Staff deleted successfully"
+);
         } catch(error){
             console.error("Error deleting staff:", error);
             next(error)
         }
     
     }
-export const handleUpdateStaff = async(req,res,)=>{
+export const handleUpdateStaff = async(req,res,next)=>{
        try{
         const {id} = req.params;
         const {name,email,phone, Address} = req.body
+
+if(!mongoose.Types.ObjectId.isValid(id)){
+    const error = new Error("Invalid staff ID");
+    error.statusCode = 400;
+    return next(error);
+}
+
         const staff = await Staff.findById(id)
 
     
@@ -238,7 +290,12 @@ export const handleUpdateStaff = async(req,res,)=>{
         const updatedStaff = await Staff.findByIdAndUpdate(id, {name,email,phone, Address},{new:true})
 
         
-        res.status(200).json({message:"Staff updated successfully", updatedStaff})
+        return successResponse(
+    res,
+    200,
+    "Staff updated successfully",
+    updatedStaff
+);
        } catch(error){
         next(error)
        }

@@ -22,7 +22,11 @@ const error = new Error("All fields are required");
         
         const doctorExists = await Doctor.findOne({staff: staff_id});
         if(doctorExists){
-            return res.status(400).json({message: "Doctor account already exists"})
+            if (doctorExists) {
+    const error = new Error("Doctor account already exists");
+    error.statusCode = 400;
+    return next(error);
+}
         }
 
         const staffExists = await Staff.findById(staff_id);
@@ -41,7 +45,12 @@ const error = new Error("All fields are required");
             consultingDay
         });
 
-        res.status(201).json({message: "Doctor data created successfully", doctor});
+        return successResponse(
+    res,
+    201,
+    "Doctor data created successfully",
+    doctor
+);
         
         }catch (error) {
              next(error);
@@ -50,7 +59,12 @@ const error = new Error("All fields are required");
 export const handlegetAllDoctors = async (req, res, next) => {
         try{
             const doctors = await Doctor.find().populate("staff", "name email").lean();
-        res.status(200).json({Message:"List of Doctors", doctors})
+        return successResponse(
+    res,
+    200,
+    "Doctors retrieved successfully",
+    doctors
+);
         } catch (error) {
             next(error);
         }
@@ -71,7 +85,12 @@ export const handlegetDoctorById = async (req, res, next) => {
             error.statusCode = 404;
             return next(error);
         }
-        res.status(200).json({doctor});
+        return successResponse(
+            res,
+            200,
+            "Doctor found",
+            doctor
+        );
        } catch (error) {
             next(error);    
     }
@@ -91,7 +110,13 @@ export const handledeleteDoctor = async (req, res, next) => {
             return next(error);
         }
        const deletedDoctor = await Doctor.findByIdAndDelete(id);
-        res.status(200).json({message: "Doctor deleted successfully", deletedDoctor});} catch (error) {
+        return successResponse(
+            res,
+            200,
+            "Doctor deleted successfully",
+            deletedDoctor
+        );
+        } catch (error) {
             next(error) 
     }
 }
@@ -110,7 +135,12 @@ export const handleupdatedoctor = async (req, res, next) => {
             return next(error);
         }
         const updatedDoctor = await Doctor.findByIdAndUpdate(id, {specialization, yearsOfExperience, clinicHours,consultingDay, licenseNum}, {new: true}).populate("staff", "name email");
-        res.status(200).json({message: "Doctor updated successfully", updatedDoctor});} catch(error) {
+        return successResponse(
+            res,
+            200,
+            "Doctor updated successfully",
+            updatedDoctor
+        );} catch(error) {
         next(error) 
         }
     }
