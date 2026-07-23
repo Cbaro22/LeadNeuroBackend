@@ -63,12 +63,30 @@ export const handleCreateStaff = async(req,res,next)=>{
 
 export const handleGetAllStaff =async(req,res,next)=>{
    try {
+
+const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const skip = (page - 1) * limit;
+
+        const totalStaff = await Staff.countDocuments();
+
      const staff = await Staff.find()
+
+           .skip(skip)
+            .limit(limit);
+
     return successResponse(
     res,
     200,
     "Staff retrieved successfully",
-    staff
+    {
+                totalStaff,
+                currentPage: page,
+                totalPages: Math.ceil(totalStaff / limit),
+                limit,
+                staff
+            }
 );
    } catch (error) {
     next(error)
