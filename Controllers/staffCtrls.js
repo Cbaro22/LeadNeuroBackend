@@ -66,13 +66,14 @@ export const handleGetAllStaff =async(req,res,next)=>{
 
 const page = Math.max(parseInt(req.query.page) || 1, 1);
 const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
+const sort = req.query.sort || "-createdAt";
 
         const skip = (page - 1) * limit;
 
         const totalStaff = await Staff.countDocuments();
 
      const staff = await Staff.find()
-
+           .sort(sort)
            .skip(skip)
            .limit(limit)
 
