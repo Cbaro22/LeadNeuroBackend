@@ -5,6 +5,7 @@ import { successResponse } from "../Services/apiResponse.js";
 import { errorResponse } from "../Services/apiResponse.js";
 import { getValidatedSort } from "../Services/sortService.js";
 import { getValidatedFilter } from "../Services/filterService.js";
+import { getSearchQuery } from "../Services/searchServices.js";
 
 
 export const handlecreatecleaner = async (req, res, next) => {
@@ -60,6 +61,13 @@ export const handlegetAllCleaners = async (req, res, next) => {
     supervisor: "regex",
     areaAssigned: "regex"
 });
+
+const searchQuery = getSearchQuery(req.query.search, [
+    "shift",
+    "supervisor",
+    "areaAssigned",
+    "workSchedule"
+]);
        
       const allowedSortFields = [
     "shift",
@@ -73,9 +81,14 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
 
       const skip = (page - 1) * limit
 
-      const totalCleaners = await Cleaner.countDocuments(filter)
+      const query = {
+    ...filter,
+    ...searchQuery
+};
 
-    const cleaners = await Cleaner.find(filter)
+      const totalCleaners = await Cleaner.countDocuments(query)
+
+    const cleaners = await Cleaner.find(query)
     .populate("staff", "name email")
     .sort(sort)
     .skip(skip)

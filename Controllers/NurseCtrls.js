@@ -5,6 +5,7 @@ import { successResponse } from "../Services/apiResponse.js";
 import { errorResponse } from "../Services/apiResponse.js";
 import { getValidatedSort } from "../Services/sortService.js";
 import { getValidatedFilter } from "../Services/filterService.js";
+import { getSearchQuery } from "../Services/searchServices.js";
 
 
 export const handledeleteNurse = async (req, res, next) => {
@@ -89,6 +90,13 @@ export const handlegetAllNurses = async (req, res, next) => {
     shift: "exact",
     supervisor: "regex"
 });
+
+const searchQuery = getSearchQuery(req.query.search, [
+    "department",
+    "shift",
+    "supervisor",
+    "workSchedule"
+]);
     
     const allowedSortFields = [
     "department",
@@ -102,9 +110,14 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
 
     const skip =(page - 1) * limit;
 
-    const totalNurses = await Nurse.countDocuments(filter);
+const query = {
+    ...filter,
+    ...searchQuery
+};
 
-    const nurses = await Nurse.find(filter)
+    const totalNurses = await Nurse.countDocuments(query);
+
+    const nurses = await Nurse.find(query)
     .populate("staff", "name email")
     .sort(sort)
     .skip(skip)

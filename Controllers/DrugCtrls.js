@@ -5,6 +5,7 @@ import { successResponse } from "../Services/apiResponse.js";
 import { errorResponse } from "../Services/apiResponse.js";
 import { getValidatedSort } from "../Services/sortService.js";
 import { getValidatedFilter } from "../Services/filterService.js";
+import { getSearchQuery } from "../Services/searchServices.js";
 
 export const handleCreateDrug = async (req, res, next) => {
   try{
@@ -49,6 +50,16 @@ export const handleGetAllDrugs = async (req, res, next) => {
     manufacturer: "regex",
     isActive: "exact"
 });
+
+const searchQuery = getSearchQuery(req.query.search, [
+    "genericName",
+    "brandName",
+    "therapeuticClass",
+    "manufacturer",
+    "strength",
+    "dosageForm"
+]);
+
         const allowedSortFields = [
     "genericName",
     "brandName",
@@ -65,9 +76,13 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
 
         const skip = (page - 1) * limit;
 
-        const totalDrugs = await Drugs.countDocuments(filter);
+        const query = {
+    ...filter,
+    ...searchQuery
+};
+        const totalDrugs = await Drugs.countDocuments(query);
         
-        const drugs = await Drugs.find(filter)
+        const drugs = await Drugs.find(query)
         .sort(sort)
         .skip(skip)
         .limit(limit)

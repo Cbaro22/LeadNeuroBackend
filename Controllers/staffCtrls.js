@@ -14,6 +14,7 @@ import { successResponse } from "../Services/apiResponse.js"
 import { errorResponse } from "../Services/apiResponse.js"
 import { getValidatedSort } from "../Services/sortService.js"
 import { getValidatedFilter } from "../Services/filterService.js"
+import { getSearchQuery } from "../Services/searchServices.js"
 
 
 
@@ -69,11 +70,22 @@ export const handleGetAllStaff =async(req,res,next)=>{
 const page = Math.max(parseInt(req.query.page) || 1, 1);
 const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
 
+
+
 const filter = getValidatedFilter(req.query, {
     name: "regex",
     department: "regex",
     role: "exact"
 });
+
+const searchQuery = getSearchQuery(
+    req.query.search,
+    [
+        "name",
+        "email",
+        "department"
+    ]
+);
 
 
 const allowedSortFields = [
@@ -91,9 +103,14 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
 
         const skip = (page - 1) * limit;
 
-        const totalStaff = await Staff.countDocuments(filter);
+        const query = {
+    ...filter,
+    ...searchQuery
+};
 
-     const staff = await Staff.find(filter)
+const totalStaff = await Staff.countDocuments(query);
+
+const staff = await Staff.find(query)
            .sort(sort)
            .skip(skip)
            .limit(limit)

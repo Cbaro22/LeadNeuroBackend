@@ -6,6 +6,7 @@ import { successResponse} from "../Services/apiResponse.js";
 import { errorResponse } from "../Services/apiResponse.js";
 import { getValidatedSort } from "../Services/sortService.js";
 import { getValidatedFilter } from "../Services/filterService.js";
+import { getSearchQuery } from "../Services/searchServices.js";
 
 export const handlecreateDoctor = async (req, res, next) => {
         try{
@@ -71,7 +72,12 @@ const page = Math.max(parseInt(req.query.page) || 1, 1);
     consultingDay: "regex",
     clinicHours: "regex"
 });
-        
+        const searchQuery = getSearchQuery(req.query.search, [
+    "specialization",
+    "licenseNum",
+    "consultingDay",
+    "clinicHours"
+]);
         const allowedSortFields = [
     "specialization",
     "yearsOfExperience",
@@ -85,8 +91,14 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
 
         const skip = (page - 1) * limit;
 
-        const totalDoctors = await Doctor.countDocuments(filter);
- const doctors = await Doctor.find(filter)
+        const query = {
+    ...filter,
+    ...searchQuery
+};
+const totalDoctors = await Doctor.countDocuments(query);
+
+const doctors = await Doctor.find(query)
+       
  .populate("staff", "name email")
  .sort(sort)
  .skip(skip)
