@@ -63,11 +63,14 @@ export const handlegetAllDoctors = async (req, res, next) => {
 
 const page = Math.max(parseInt(req.query.page) || 1, 1);
         const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
+        const sort = req.query.sort || "-createdAt"
 
         const skip = (page - 1) * limit;
 
         const totalDoctors = await Doctor.countDocuments();
- const doctors = await Doctor.find().populate("staff", "name email")
+ const doctors = await Doctor.find()
+ .populate("staff", "name email")
+ .sort(sort)
  .skip(skip)
  .limit(limit)
  .lean();
