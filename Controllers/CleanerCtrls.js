@@ -73,9 +73,9 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
 
       const skip = (page - 1) * limit
 
-      const totalCleaners = await Cleaner.countDocuments()
+      const totalCleaners = await Cleaner.countDocuments(filter)
 
-    const cleaners = await Cleaner.find()
+    const cleaners = await Cleaner.find(filter)
     .populate("staff", "name email")
     .sort(sort)
     .skip(skip)

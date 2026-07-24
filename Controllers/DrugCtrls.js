@@ -65,9 +65,9 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
 
         const skip = (page - 1) * limit;
 
-        const totalDrugs = await Drugs.countDocuments();
+        const totalDrugs = await Drugs.countDocuments(filter);
         
-        const drugs = await Drugs.find()
+        const drugs = await Drugs.find(filter)
         .sort(sort)
         .skip(skip)
         .limit(limit);
