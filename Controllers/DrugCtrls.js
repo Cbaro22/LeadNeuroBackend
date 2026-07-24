@@ -39,7 +39,7 @@ export const handleCreateDrug = async (req, res, next) => {
 export const handleGetAllDrugs = async (req, res, next) => {
     try{
         const page = Math.max(parseInt(req.query.page) || 1, 1);
-        const limit = Math.min(parseInt(Math.max(req.query.limit) || 10, 1), 100 );
+        const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100 );
 
         const skip = (page - 1) * limit;
 
