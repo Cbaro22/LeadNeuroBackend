@@ -3,6 +3,7 @@ import mongoose, { mongo } from "mongoose";
 import Drugs from "../Models/Drugs.js";
 import { successResponse } from "../Services/apiResponse.js";
 import { errorResponse } from "../Services/apiResponse.js";
+import { getValidatedSort } from "../Services/sortService.js";
 
 export const handleCreateDrug = async (req, res, next) => {
   try{
