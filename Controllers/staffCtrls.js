@@ -12,6 +12,7 @@ import Cleaner from "../Models/Cleaner.js"
 import mongoose from "mongoose"
 import { successResponse } from "../Services/apiResponse.js"
 import { errorResponse } from "../Services/apiResponse.js"
+import { getValidatedSort } from "../Services/sortService.js"
 
 
 
@@ -66,7 +67,20 @@ export const handleGetAllStaff =async(req,res,next)=>{
 
 const page = Math.max(parseInt(req.query.page) || 1, 1);
 const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
-const sort = req.query.sort || "-createdAt";
+
+
+const allowedSortFields = [
+    "name",
+    "email",
+    "department",
+    "salary",
+    "role",
+    "createdAt",
+    "dateEmployed"
+];
+
+const sort = getValidatedSort(req.query.sort, allowedSortFields);
+
 
         const skip = (page - 1) * limit;
 

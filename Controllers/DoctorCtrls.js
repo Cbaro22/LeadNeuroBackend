@@ -4,6 +4,7 @@ import Staff from "../Models/Staff.js";
 import { errorHandler } from "../Middlewares/errorHandler.js";
 import { successResponse} from "../Services/apiResponse.js";
 import { errorResponse } from "../Services/apiResponse.js";
+import { getValidatedSort } from "../Services/sortService.js";
 
 export const handlecreateDoctor = async (req, res, next) => {
         try{
@@ -63,7 +64,17 @@ export const handlegetAllDoctors = async (req, res, next) => {
 
 const page = Math.max(parseInt(req.query.page) || 1, 1);
         const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
-        const sort = req.query.sort || "-createdAt"
+        
+        const allowedSortFields = [
+    "specialization",
+    "yearsOfExperience",
+    "clinicHours",
+    "consultingDay",
+    "licenseNum",
+    "createdAt"
+];
+
+const sort = getValidatedSort(req.query.sort, allowedSortFields);
 
         const skip = (page - 1) * limit;
 

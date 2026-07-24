@@ -53,7 +53,16 @@ export const handlegetAllCleaners = async (req, res, next) => {
      try{
         const page = Math.max(parseInt(req.query.page) || 1, 1);
       const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
-      const sort = req.query.sort || "-createdAt"
+       
+      const allowedSortFields = [
+    "shift",
+    "supervisor",
+    "areaAssigned",
+    "workSchedule",
+    "createdAt"
+];
+
+const sort = getValidatedSort(req.query.sort, allowedSortFields);
 
       const skip = (page - 1) * limit
 
