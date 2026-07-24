@@ -70,7 +70,8 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
         const drugs = await Drugs.find(filter)
         .sort(sort)
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
+        .lean();
     return successResponse(
     res,
     200,

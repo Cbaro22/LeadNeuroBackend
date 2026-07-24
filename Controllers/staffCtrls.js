@@ -97,6 +97,7 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
            .sort(sort)
            .skip(skip)
            .limit(limit)
+           .lean()
 
     return successResponse(
     res,
