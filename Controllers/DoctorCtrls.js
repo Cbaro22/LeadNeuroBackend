@@ -60,12 +60,28 @@ const error = new Error("All fields are required");
 }
 export const handlegetAllDoctors = async (req, res, next) => {
         try{
-            const doctors = await Doctor.find().populate("staff", "name email").lean();
+
+const page = Math.max(parseInt(req.query.page) || 1, 1);
+        const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
+
+        const skip = (page - 1) * limit;
+
+        const totalDoctors = await Doctor.countDocuments();
+ const doctors = await Doctor.find().populate("staff", "name email")
+ .skip(skip)
+ .limit(limit)
+ .lean();
         return successResponse(
     res,
     200,
     "Doctors retrieved successfully",
-    doctors
+    {
+                totalDoctors,
+                currentPage: page,
+                totalPages: Math.ceil(totalDoctors / limit),
+                limit,
+                doctors
+            }
 );
         } catch (error) {
             next(error);

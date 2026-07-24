@@ -37,12 +37,28 @@ export const handleCreateDrug = async (req, res, next) => {
 }
 
 export const handleGetAllDrugs = async (req, res, next) => {
-    try{const drugs = await Drugs.find();
+    try{
+        const page = Math.max(parseInt(req.query.page) || 1, 1);
+        const limit = Math.min(parseInt(Math.max(req.query.limit) || 10, 1), 100 );
+
+        const skip = (page - 1) * limit;
+
+        const totalDrugs = await Drugs.countDocuments();
+        
+        const drugs = await Drugs.find()
+        .skip(skip)
+        .limit(limit);
     return successResponse(
     res,
     200,
     "List of drugs retrieved successfully",
-    drugs
+    {
+        totalDrugs,
+        currentPage: page,
+        totalPages: Math.ceil( totalDrugs / limit),
+        limit,
+        drugs
+    }
 );
 } catch(error){
     next(error)

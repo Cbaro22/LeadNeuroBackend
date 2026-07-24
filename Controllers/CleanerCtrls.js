@@ -49,13 +49,31 @@ return next(error);
     } 
     
 export const handlegetAllCleaners = async (req, res, next) => {
-    try{
-        const cleaners = await Cleaner.find().populate("staff", "name email").lean();
+
+     try{
+        const page = Math.max(parseInt(req.query.page) || 1, 1);
+      const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
+
+      const skip = (page - 1) * limit
+
+      const totalCleaners = await Cleaner.countDocuments()
+
+    const cleaners = await Cleaner.find()
+    .populate("staff", "name email")
+    .skip(skip)
+    .limit(limit)
+    .lean();
         return successResponse(
     res,
     200,
     "Cleaners retrieved successfully",
-    cleaners
+    {
+        totalCleaners,
+        currentPage: page,
+        totalPages: Math.ceil(totalCleaners / limit),
+        limit,
+        cleaners}
+
 );
     } catch(error){
         next(error)

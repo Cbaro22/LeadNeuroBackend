@@ -74,7 +74,7 @@ const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
      const staff = await Staff.find()
 
            .skip(skip)
-            .limit(limit);
+           .limit(limit)
 
     return successResponse(
     res,

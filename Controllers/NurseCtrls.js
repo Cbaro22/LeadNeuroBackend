@@ -3,6 +3,7 @@ import Nurse from "../Models/Nurse.js";
 import Staff from "../Models/Staff.js";
 import { successResponse } from "../Services/apiResponse.js";
 import { errorResponse } from "../Services/apiResponse.js";
+import { matchedData } from "express-validator";
 
 
 export const handledeleteNurse = async (req, res, next) => {
@@ -80,13 +81,32 @@ export const handlecreateNurse = async (req, res, next) => {
     
 export const handlegetAllNurses = async (req, res, next) => {
     try{
-        const nurses = await Nurse.find().populate("staff", "name email").lean();
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
+
+    const skip =(page - 1) * limit;
+
+    const totalNurses = await Nurse.countDocuments();
+
+    const nurses = await Nurse.find()
+    .populate("staff", "name email")
+    .skip(skip)
+    .limit(limit)
+    .lean();
         return successResponse(
     res,
     200,
     "List of nurses",
-    nurses
-);;
+    {
+        totalNurses,
+        currentPage: page,
+        totalPages: Math.ceil(totalNurses / limit),
+        limit,
+        nurses
+
+    }
+    
+);
     } catch(error){
         next(error)
     }
