@@ -5,6 +5,7 @@ import { errorHandler } from "../Middlewares/errorHandler.js";
 import { successResponse} from "../Services/apiResponse.js";
 import { errorResponse } from "../Services/apiResponse.js";
 import { getValidatedSort } from "../Services/sortService.js";
+import { getValidatedFilter } from "../Services/filterService.js";
 
 export const handlecreateDoctor = async (req, res, next) => {
         try{
@@ -64,6 +65,12 @@ export const handlegetAllDoctors = async (req, res, next) => {
 
 const page = Math.max(parseInt(req.query.page) || 1, 1);
         const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
+
+        const filter = getValidatedFilter(req.query, {
+    specialization: "regex",
+    consultingDay: "regex",
+    clinicHours: "regex"
+});
         
         const allowedSortFields = [
     "specialization",
@@ -78,8 +85,8 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
 
         const skip = (page - 1) * limit;
 
-        const totalDoctors = await Doctor.countDocuments();
- const doctors = await Doctor.find()
+        const totalDoctors = await Doctor.countDocuments(filter);
+ const doctors = await Doctor.find(filter)
  .populate("staff", "name email")
  .sort(sort)
  .skip(skip)

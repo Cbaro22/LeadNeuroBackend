@@ -3,7 +3,8 @@ import Nurse from "../Models/Nurse.js";
 import Staff from "../Models/Staff.js";
 import { successResponse } from "../Services/apiResponse.js";
 import { errorResponse } from "../Services/apiResponse.js";
-import { matchedData } from "express-validator";
+import { getValidatedSort } from "../Services/sortService.js";
+import { getValidatedFilter } from "../Services/filterService.js";
 
 
 export const handledeleteNurse = async (req, res, next) => {
@@ -83,6 +84,11 @@ export const handlegetAllNurses = async (req, res, next) => {
     try{
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
+    const filter = getValidatedFilter(req.query, {
+    department: "regex",
+    shift: "exact",
+    supervisor: "regex"
+});
     
     const allowedSortFields = [
     "department",
@@ -96,9 +102,9 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
 
     const skip =(page - 1) * limit;
 
-    const totalNurses = await Nurse.countDocuments();
+    const totalNurses = await Nurse.countDocuments(filter);
 
-    const nurses = await Nurse.find()
+    const nurses = await Nurse.find(filter)
     .populate("staff", "name email")
     .sort(sort)
     .skip(skip)

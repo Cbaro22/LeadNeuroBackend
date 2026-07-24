@@ -4,6 +4,7 @@ import Drugs from "../Models/Drugs.js";
 import { successResponse } from "../Services/apiResponse.js";
 import { errorResponse } from "../Services/apiResponse.js";
 import { getValidatedSort } from "../Services/sortService.js";
+import { getValidatedFilter } from "../Services/filterService.js";
 
 export const handleCreateDrug = async (req, res, next) => {
   try{
@@ -41,7 +42,13 @@ export const handleGetAllDrugs = async (req, res, next) => {
     try{
         const page = Math.max(parseInt(req.query.page) || 1, 1);
         const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100 );
-        
+        const filter = getValidatedFilter(req.query, {
+    brandName: "regex",
+    genericName: "regex",
+    therapeuticClass: "regex",
+    manufacturer: "regex",
+    isActive: "exact"
+});
         const allowedSortFields = [
     "genericName",
     "brandName",

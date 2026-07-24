@@ -13,6 +13,7 @@ import mongoose from "mongoose"
 import { successResponse } from "../Services/apiResponse.js"
 import { errorResponse } from "../Services/apiResponse.js"
 import { getValidatedSort } from "../Services/sortService.js"
+import { getValidatedFilter } from "../Services/filterService.js"
 
 
 
@@ -68,6 +69,12 @@ export const handleGetAllStaff =async(req,res,next)=>{
 const page = Math.max(parseInt(req.query.page) || 1, 1);
 const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
 
+const filter = getValidatedFilter(req.query, {
+    name: "regex",
+    department: "regex",
+    role: "exact"
+});
+
 
 const allowedSortFields = [
     "name",
@@ -84,9 +91,9 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
 
         const skip = (page - 1) * limit;
 
-        const totalStaff = await Staff.countDocuments();
+        const totalStaff = await Staff.countDocuments(filter);
 
-     const staff = await Staff.find()
+     const staff = await Staff.find(filter)
            .sort(sort)
            .skip(skip)
            .limit(limit)

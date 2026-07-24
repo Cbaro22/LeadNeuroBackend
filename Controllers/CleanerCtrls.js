@@ -3,6 +3,8 @@ import Cleaner from "../Models/Cleaner.js";
 import Staff from "../Models/Staff.js";
 import { successResponse } from "../Services/apiResponse.js";
 import { errorResponse } from "../Services/apiResponse.js";
+import { getValidatedSort } from "../Services/sortService.js";
+import { getValidatedFilter } from "../Services/filterService.js";
 
 
 export const handlecreatecleaner = async (req, res, next) => {
@@ -53,6 +55,11 @@ export const handlegetAllCleaners = async (req, res, next) => {
      try{
         const page = Math.max(parseInt(req.query.page) || 1, 1);
       const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
+      const filter = getValidatedFilter(req.query, {
+    shift: "exact",
+    supervisor: "regex",
+    areaAssigned: "regex"
+});
        
       const allowedSortFields = [
     "shift",
