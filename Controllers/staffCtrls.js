@@ -15,6 +15,8 @@ import { errorResponse } from "../Services/apiResponse.js"
 import { getValidatedSort } from "../Services/sortService.js"
 import { getValidatedFilter } from "../Services/filterService.js"
 import { getSearchQuery } from "../Services/searchServices.js"
+import { getSelectedFields } from "../Services/selectField.js"
+import { getPagination } from "../Services/paginationServices.js"
 
 
 
@@ -69,7 +71,7 @@ export const handleGetAllStaff =async(req,res,next)=>{
 
 const page = Math.max(parseInt(req.query.page) || 1, 1);
 const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
-
+const selectedFields = getSelectedFields(req.query.fields);
 
 
 const filter = getValidatedFilter(req.query, {
@@ -115,18 +117,21 @@ const staff = await Staff.find(query)
            .skip(skip)
            .limit(limit)
            .lean()
+           .select(selectedFields)
 
-    return successResponse(
+
+
+const pagination = getPagination(page, limit, totalStaff);
+
+return successResponse(
     res,
     200,
     "Staff retrieved successfully",
     {
-                totalStaff,
-                currentPage: page,
-                totalPages: Math.ceil(totalStaff / limit),
-                limit,
-                staff
-            }
+        ...pagination,
+        totalStaff,
+        staff
+    }
 );
    } catch (error) {
     next(error)

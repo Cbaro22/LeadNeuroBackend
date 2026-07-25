@@ -7,6 +7,7 @@ import { errorResponse } from "../Services/apiResponse.js";
 import { getValidatedSort } from "../Services/sortService.js";
 import { getValidatedFilter } from "../Services/filterService.js";
 import { getSearchQuery } from "../Services/searchServices.js";
+import { getSelectedFields } from "../Services/selectField.js";
 
 export const handlecreateDoctor = async (req, res, next) => {
         try{
@@ -66,6 +67,7 @@ export const handlegetAllDoctors = async (req, res, next) => {
 
 const page = Math.max(parseInt(req.query.page) || 1, 1);
         const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
+        const selectedFields = getSelectedFields(req.query.fields);
 
         const filter = getValidatedFilter(req.query, {
     specialization: "regex",
@@ -100,6 +102,7 @@ const totalDoctors = await Doctor.countDocuments(query);
 const doctors = await Doctor.find(query)
        
  .populate("staff", "name email")
+ .select(selectedFields)
  .sort(sort)
  .skip(skip)
  .limit(limit)
