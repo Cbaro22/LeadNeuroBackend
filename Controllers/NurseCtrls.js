@@ -7,6 +7,7 @@ import { getValidatedSort } from "../Services/sortService.js";
 import { getValidatedFilter } from "../Services/filterService.js";
 import { getSearchQuery } from "../Services/searchServices.js";
 import { getSelectedFields } from "../Services/selectField.js";
+import cache from "../Services/cacheServices.js";
 import { getPagination } from "../Services/paginationServices.js";
 
 
@@ -118,9 +119,20 @@ const query = {
     ...searchQuery
 };
 
-    const totalNurses = await Nurse.countDocuments(query);
+const cacheKey = req.originalUrl;
 
-    const pagination = getPagination(page, limit, totalNurses);
+const cachedData = cache.get(cacheKey);
+
+if (cachedData) {
+    return successResponse(
+        res,
+        200,
+        "List of nurses (cached)",
+        cachedData
+    );
+}
+
+    const totalNurses = await Nurse.countDocuments(query);
 
     const nurses = await Nurse.find(query)
     .populate("staff", "name email")
@@ -129,15 +141,22 @@ const query = {
     .skip(skip)
     .limit(limit)
     .lean();
+
+const pagination = getPagination(page, limit, totalNurses);
+
+    const responseData = {
+    ...pagination,
+    totalNurses,
+    nurses
+};
+
+cache.set(cacheKey, responseData);
+
         return successResponse(
     res,
     200,
     "List of nurses",
-    {
-        ...pagination,
-        totalNurses,
-        nurses
-    }
+    responseData
 );
     } catch(error){
         next(error)

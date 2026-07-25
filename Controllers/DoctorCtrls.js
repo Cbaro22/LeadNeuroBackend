@@ -8,6 +8,7 @@ import { getValidatedSort } from "../Services/sortService.js";
 import { getValidatedFilter } from "../Services/filterService.js";
 import { getSearchQuery } from "../Services/searchServices.js";
 import { getSelectedFields } from "../Services/selectField.js";
+import cache from "../Services/cacheServices.js";
 import { getPagination } from "../Services/paginationServices.js";
 
 export const handlecreateDoctor = async (req, res, next) => {
@@ -98,9 +99,21 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
     ...filter,
     ...searchQuery
 };
-const totalDoctors = await Doctor.countDocuments(query);
 
-const pagination = getPagination(page, limit, totalDoctors);
+const cacheKey = req.originalUrl;
+
+const cachedData = cache.get(cacheKey);
+
+if (cachedData) {
+    return successResponse(
+        res,
+        200,
+        "List of doctors (cached)",
+        cachedData
+    );
+}
+
+const totalDoctors = await Doctor.countDocuments(query);
 
 const doctors = await Doctor.find(query)
        
@@ -110,15 +123,22 @@ const doctors = await Doctor.find(query)
  .skip(skip)
  .limit(limit)
  .lean();
+
+const pagination = getPagination(page, limit, totalDoctors);
+
+const responseData = {
+    ...pagination,
+    totalDoctors,
+    doctors
+};
+
+cache.set(cacheKey, responseData);
+
         return successResponse(
     res,
     200,
     "List of doctors",
-    {
-        ...pagination,
-        totalDoctors,
-        doctors
-    }
+    responseData
 );
         } catch (error) {
             next(error);

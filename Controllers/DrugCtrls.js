@@ -7,6 +7,7 @@ import { getValidatedSort } from "../Services/sortService.js";
 import { getValidatedFilter } from "../Services/filterService.js";
 import { getSearchQuery } from "../Services/searchServices.js";
 import { getSelectedFields } from "../Services/selectField.js";
+import cache from "../Services/cacheServices.js";
 import { getPagination } from "../Services/paginationServices.js";
 
 export const handleCreateDrug = async (req, res, next) => {
@@ -83,25 +84,43 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
     ...filter,
     ...searchQuery
 };
+
+const cacheKey = req.originalUrl;
+
+const cachedData = cache.get(cacheKey);
+
+if (cachedData) {
+    return successResponse(
+        res,
+        200,
+        "List of drugs retrieved successfully (cached)",
+        cachedData
+    );
+}
         const totalDrugs = await Drugs.countDocuments(query);
 
-        const pagination = getPagination(page, limit, totalDrugs);
-        
-        const drugs = await Drugs.find(query)
+            const drugs = await Drugs.find(query)
         .select(selectedFields)
         .sort(sort)
         .skip(skip)
         .limit(limit)
         .lean();
+
+         const pagination = getPagination(page, limit, totalDrugs);
+
+const responseData = {
+    ...pagination,
+    totalDrugs,
+    drugs
+};
+
+cache.set(cacheKey, responseData);
+
     return successResponse(
     res,
     200,
     "List of drugs retrieved successfully",
-    {
-        ...pagination,
-        totalDrugs,
-        drugs
-    }
+    responseData
 );
 } catch(error){
     next(error)

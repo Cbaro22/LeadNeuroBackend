@@ -7,6 +7,7 @@ import { getValidatedSort } from "../Services/sortService.js";
 import { getValidatedFilter } from "../Services/filterService.js";
 import { getSearchQuery } from "../Services/searchServices.js";
 import { getSelectedFields } from "../Services/selectField.js";
+import cache from "../Services/cacheServices.js";
 import { getPagination } from "../Services/paginationServices.js";
 
 
@@ -89,26 +90,46 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
     ...searchQuery
 };
 
+const cacheKey = req.originalUrl;
+
+const cachedData = cache.get(cacheKey);
+
+if (cachedData) {
+    return successResponse(
+        res,
+        200,
+        "List of cleaners (cached)",
+        cachedData
+    );
+}
+
       const totalCleaners = await Cleaner.countDocuments(query)
 
-      const pagination = getPagination(page, limit, totalCleaners);
-
-    const cleaners = await Cleaner.find(query)
+     const cleaners = await Cleaner.find(query)
     .populate("staff", "name email")
     .select(selectedFields)
     .sort(sort)
     .skip(skip)
     .limit(limit)
     .lean();
+
+  const pagination = getPagination(page, limit, totalCleaners);
+
+      const responseData = {
+    ...pagination,
+    totalCleaners,
+    cleaners
+};
+
+cache.set(cacheKey, responseData);
+
+
       return successResponse(
     res,
     200,
     "List of cleaners",
-    {
-        ...pagination,
-        totalCleaners,
-        cleaners
-    }
+    
+    responseData
 );
     } catch(error){
         next(error)

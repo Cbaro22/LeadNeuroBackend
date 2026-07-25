@@ -16,6 +16,7 @@ import { getValidatedSort } from "../Services/sortService.js"
 import { getValidatedFilter } from "../Services/filterService.js"
 import { getSearchQuery } from "../Services/searchServices.js"
 import { getSelectedFields } from "../Services/selectField.js"
+import cache from "../Services/cacheServices.js"
 import { getPagination } from "../Services/paginationServices.js"
 
 
@@ -110,6 +111,19 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
     ...searchQuery
 };
 
+        const cacheKey = req.originalUrl;
+
+        const cachedData = cache.get(cacheKey);
+
+        if (cachedData) {
+            return successResponse(
+                res,
+                200,
+                "Staff retrieved successfully (cached)",
+                cachedData
+            );
+        }
+
 const totalStaff = await Staff.countDocuments(query);
 
 const staff = await Staff.find(query)
@@ -123,15 +137,19 @@ const staff = await Staff.find(query)
 
 const pagination = getPagination(page, limit, totalStaff);
 
+        const responseData = {
+            ...pagination,
+            totalStaff,
+            staff
+        };
+
+                cache.set(cacheKey, responseData);
+
 return successResponse(
     res,
     200,
     "Staff retrieved successfully",
-    {
-        ...pagination,
-        totalStaff,
-        staff
-    }
+    responseData
 );
    } catch (error) {
     next(error)
