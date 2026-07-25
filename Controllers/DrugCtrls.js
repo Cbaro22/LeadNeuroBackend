@@ -116,6 +116,8 @@ const responseData = {
 
 cache.set(cacheKey, responseData);
 
+   cache.flushAll()
+
     return successResponse(
     res,
     200,
@@ -205,6 +207,9 @@ const drug = await Drugs.findById(id);
             return next(error);
     }
     const updatedDrug = await Drugs.findByIdAndUpdate(id,  {genericName, therapeuticClass, indications, contraindications, sideEffects, interactions, route, brandName, manufacturer, dosageForm, strength, nafdacNumber, costPrice, minimumStockLevel, isActive,sellingPrice}, { new: true });
+
+        cache.flushAll()
+
     return successResponse(
         res,
         200,
@@ -236,6 +241,9 @@ if(mongoose.Types.ObjectId.isValid(id)){
     }
 
    const deletedDrug = await Drugs.findByIdAndDelete(id);
+
+     cache.flushAll()
+
     return successResponse(
         res,
         200,

@@ -51,6 +51,9 @@ export const handleCreateStaff = async(req,res,next)=>{
     }
 
     await registerationEmail(newStaff.email)
+
+      cache.flushAll()
+
     return successResponse(
     res,
     201,
@@ -337,6 +340,8 @@ const staff = await Staff.findById(id)
         }
         await Staff.findByIdAndDelete(id)
         await deleteAccountEmail(staff.email)
+
+        cache.flushAll()
         
         return successResponse(
     res,
@@ -370,6 +375,8 @@ if(!mongoose.Types.ObjectId.isValid(id)){
             return next(error); 
         }
         const updatedStaff = await Staff.findByIdAndUpdate(id, {name,email,phone, Address},{new:true})
+
+        cache.flushAll()
 
         
         return successResponse(

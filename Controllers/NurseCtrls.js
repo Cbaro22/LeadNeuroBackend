@@ -27,6 +27,9 @@ export const handledeleteNurse = async (req, res, next) => {
         }
 
         const deletedNurse = await Nurse.findByIdAndDelete({staff:staff_id});
+
+            cache.flushAll()
+
         return successResponse(
     res,
     200,
@@ -70,6 +73,9 @@ export const handlecreateNurse = async (req, res, next) => {
                 staff: staff_id,
                 department, shift, supervisor, workSchedule
             });
+
+               cache.flushAll()
+
             return successResponse(
     res,
     201,
@@ -213,6 +219,9 @@ export const handleUpdateNurse = async(req, res, next) => {
         }
 
         const updatedNurse = await Nurse.findByIdAndUpdate(id,{staff:staff_id, department, shift, supervisor, workSchedule}, {new: true}).populate("staff", "name email");
+
+          cache.flushAll()
+
         return successResponse(
     res,
     200,

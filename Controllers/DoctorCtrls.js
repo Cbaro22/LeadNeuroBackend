@@ -53,6 +53,8 @@ const error = new Error("All fields are required");
             consultingDay
         });
 
+        cache.flushAll()
+
         return successResponse(
     res,
     201,
@@ -185,6 +187,9 @@ export const handledeleteDoctor = async (req, res, next) => {
             return next(error);
         }
        const deletedDoctor = await Doctor.findByIdAndDelete(id);
+
+        cache.flushAll()
+
         return successResponse(
             res,
             200,
@@ -210,6 +215,9 @@ export const handleupdatedoctor = async (req, res, next) => {
             return next(error);
         }
         const updatedDoctor = await Doctor.findByIdAndUpdate(id, {specialization, yearsOfExperience, clinicHours,consultingDay, licenseNum}, {new: true}).populate("staff", "name email");
+
+             cache.flushAll()
+
         return successResponse(
             res,
             200,

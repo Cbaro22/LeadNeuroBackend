@@ -43,6 +43,9 @@ return next(error);
             staff: staff_id,
             shift,supervisor,areaAssigned,workSchedule
         });
+
+               cache.flushAll()
+
         return successResponse(
     res,
     201,
@@ -180,6 +183,9 @@ export const handledeleteCleaner = async (req, res, next) => {
             return next(error);
         }
         const deletedCleaner = await Cleaner.findOneAndDelete({staff: staff_id});
+
+           cache.flushAll()
+
         return successResponse(
     res,
     200,
@@ -214,6 +220,10 @@ export const handleupdateCleaner = async (req, res, next) => {
            
         }
         const updatedCleaner = await Cleaner.findOneAndUpdate({staff: staff_id}, {shift,supervisor ,areaAssigned ,workSchedule}, {new: true}).populate("staff", "name email");
+
+        cache.flushAll()
+
+
         return successResponse(
     res,
     200,
