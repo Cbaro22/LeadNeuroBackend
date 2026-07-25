@@ -8,6 +8,7 @@ import { getValidatedSort } from "../Services/sortService.js";
 import { getValidatedFilter } from "../Services/filterService.js";
 import { getSearchQuery } from "../Services/searchServices.js";
 import { getSelectedFields } from "../Services/selectField.js";
+import { getPagination } from "../Services/paginationServices.js";
 
 export const handlecreateDoctor = async (req, res, next) => {
         try{
@@ -99,6 +100,8 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
 };
 const totalDoctors = await Doctor.countDocuments(query);
 
+const pagination = getPagination(page, limit, totalDoctors);
+
 const doctors = await Doctor.find(query)
        
  .populate("staff", "name email")
@@ -110,14 +113,12 @@ const doctors = await Doctor.find(query)
         return successResponse(
     res,
     200,
-    "Doctors retrieved successfully",
+    "List of doctors",
     {
-                totalDoctors,
-                currentPage: page,
-                totalPages: Math.ceil(totalDoctors / limit),
-                limit,
-                doctors
-            }
+        ...pagination,
+        totalDoctors,
+        doctors
+    }
 );
         } catch (error) {
             next(error);

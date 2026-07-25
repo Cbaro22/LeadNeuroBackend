@@ -7,6 +7,7 @@ import { getValidatedSort } from "../Services/sortService.js";
 import { getValidatedFilter } from "../Services/filterService.js";
 import { getSearchQuery } from "../Services/searchServices.js";
 import { getSelectedFields } from "../Services/selectField.js";
+import { getPagination } from "../Services/paginationServices.js";
 
 export const handleCreateDrug = async (req, res, next) => {
   try{
@@ -83,6 +84,8 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
     ...searchQuery
 };
         const totalDrugs = await Drugs.countDocuments(query);
+
+        const pagination = getPagination(page, limit, totalDrugs);
         
         const drugs = await Drugs.find(query)
         .select(selectedFields)
@@ -95,10 +98,8 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
     200,
     "List of drugs retrieved successfully",
     {
+        ...pagination,
         totalDrugs,
-        currentPage: page,
-        totalPages: Math.ceil( totalDrugs / limit),
-        limit,
         drugs
     }
 );

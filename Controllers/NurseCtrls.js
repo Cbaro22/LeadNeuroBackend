@@ -7,6 +7,7 @@ import { getValidatedSort } from "../Services/sortService.js";
 import { getValidatedFilter } from "../Services/filterService.js";
 import { getSearchQuery } from "../Services/searchServices.js";
 import { getSelectedFields } from "../Services/selectField.js";
+import { getPagination } from "../Services/paginationServices.js";
 
 
 export const handledeleteNurse = async (req, res, next) => {
@@ -119,6 +120,8 @@ const query = {
 
     const totalNurses = await Nurse.countDocuments(query);
 
+    const pagination = getPagination(page, limit, totalNurses);
+
     const nurses = await Nurse.find(query)
     .populate("staff", "name email")
     .select(selectedFields)
@@ -131,14 +134,10 @@ const query = {
     200,
     "List of nurses",
     {
+        ...pagination,
         totalNurses,
-        currentPage: page,
-        totalPages: Math.ceil(totalNurses / limit),
-        limit,
         nurses
-
     }
-    
 );
     } catch(error){
         next(error)

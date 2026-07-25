@@ -7,6 +7,7 @@ import { getValidatedSort } from "../Services/sortService.js";
 import { getValidatedFilter } from "../Services/filterService.js";
 import { getSearchQuery } from "../Services/searchServices.js";
 import { getSelectedFields } from "../Services/selectField.js";
+import { getPagination } from "../Services/paginationServices.js";
 
 
 export const handlecreatecleaner = async (req, res, next) => {
@@ -90,6 +91,8 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
 
       const totalCleaners = await Cleaner.countDocuments(query)
 
+      const pagination = getPagination(page, limit, totalCleaners);
+
     const cleaners = await Cleaner.find(query)
     .populate("staff", "name email")
     .select(selectedFields)
@@ -97,17 +100,15 @@ const sort = getValidatedSort(req.query.sort, allowedSortFields);
     .skip(skip)
     .limit(limit)
     .lean();
-        return successResponse(
+      return successResponse(
     res,
     200,
-    "Cleaners retrieved successfully",
+    "List of cleaners",
     {
+        ...pagination,
         totalCleaners,
-        currentPage: page,
-        totalPages: Math.ceil(totalCleaners / limit),
-        limit,
-        cleaners}
-
+        cleaners
+    }
 );
     } catch(error){
         next(error)
