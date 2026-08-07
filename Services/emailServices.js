@@ -15,15 +15,21 @@ export const mailTransporter = nodemailer.createTransport({
             }
         })
 
-mailTransporter.verify()
-    .then(() => {
-    })
-    .catch((err) => {
-        console.error("SMTP Error:", err);
-    });
+if (process.env.NODE_ENV !== "test") {
+    mailTransporter.verify()
+        .then(() => {})
+        .catch((err) => {
+            console.error("SMTP Error:", err);
+        });
+}
 
 export  const registerationEmail =async (email) => {
     try {
+
+  if (process.env.NODE_ENV === "test") {
+        return;
+    }
+
         await mailTransporter.sendMail({
             from: process.env.EMAIL_USER,
             to: email,
@@ -38,6 +44,11 @@ export  const registerationEmail =async (email) => {
 
 export const loginEmail = async (email) => {
     try {
+
+  if (process.env.NODE_ENV === "test") {
+        return;
+    }
+
         await mailTransporter.sendMail({ 
             from: process.env.EMAIL,
             to: email,
@@ -50,6 +61,10 @@ export const loginEmail = async (email) => {
 }
 
     export const forgotPasswordEmail = async (email, resetToken) => {
+
+          if (process.env.NODE_ENV === "test") {
+        return;
+    }
     
         await mailTransporter.sendMail({
                     from: process.env.EMAIL,
@@ -61,6 +76,10 @@ export const loginEmail = async (email) => {
 
     export const resetPasswordEmail = async (email) => {
         try{
+  if (process.env.NODE_ENV === "test") {
+        return;
+    }
+
              await mailTransporter.sendMail({
             from: process.env.EMAIL,
             to: email,
@@ -74,6 +93,10 @@ export const loginEmail = async (email) => {
     }
 
     export const deleteAccountEmail = async (email) => {
+
+          if (process.env.NODE_ENV === "test") {
+        return;
+    }
         
         await mailTransporter.sendMail({
             from: process.env.EMAIL,

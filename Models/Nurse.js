@@ -16,7 +16,8 @@ const nurseSchema = new mongoose.Schema({
         enum: ["Morning", "Afternoon", "Night"],
     },
     yearsOfExperience: Number,
-    licenseNum:String
+    licenseNum:String,
+    supervisor:String
 },{timestamps: true});
 
 export default mongoose.model("Nurse", nurseSchema)

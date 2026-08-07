@@ -4,7 +4,7 @@ const FIFTEEN_MINUTES = 15 * 60 * 1000;
 
 export const authLimiter = rateLimit({
     windowMs: FIFTEEN_MINUTES,
-    limit: 5,
+    limit: process.env.NODE_ENV === "test" ? 100000 : 5,
     standardHeaders: true,
     legacyHeaders: false,
     message: {

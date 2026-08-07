@@ -1,13 +1,20 @@
 import { errorResponse } from "../Services/apiResponse.js";
 
-export const errorHandler = (err, req, res, next) => {
-    console.error(err);
+export default function errorHandler(err, req, res, next) {
 
-    const statusCode = err.statusCode || 500;
+    console.log("STATUS:", err.statusCode);
+    console.log("MESSAGE:", err.message);
+    console.log("STACK:", err.stack);
 
-    return errorResponse(
-        res,
-        statusCode,
-        err.message || "Internal Server Error"
-    );
-};
+    if (err.name === "CastError") {
+        return res.status(400).json({
+            success: false,
+            message: err.message
+        });
+    }
+
+    return res.status(err.statusCode || 500).json({
+        success: false,
+        message: err.message || "Internal Server Error"
+    });
+}

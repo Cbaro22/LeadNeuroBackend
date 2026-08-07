@@ -1,4 +1,4 @@
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 
 export const createNurseValidator = [
 
@@ -14,7 +14,17 @@ export const createNurseValidator = [
         .isIn(["Morning","Afternoon","Night"])
         .withMessage("Invalid shift"),
 
-    body("staff")
+    param("id")
         .isMongoId()
-        .withMessage("Invalid Staff ID")
+        .withMessage("Invalid Staff ID"),
+    body("licenseNum")
+       .notEmpty()
+       .isString()
+       .withMessage("license Number is required"),
+    body("supervisor")
+       .notEmpty()
+       .withMessage("/supervisor is required"),
+    body("yearsOfExperience")
+    .isNumeric()
+    .withMessage("Years of experience must be a number"),
 ];

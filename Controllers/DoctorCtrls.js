@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import Doctor from "../Models/Doctor.js";
 import Staff from "../Models/Staff.js";
-import { errorHandler } from "../Middlewares/errorHandler.js";
 import { successResponse} from "../Services/apiResponse.js";
 import { errorResponse } from "../Services/apiResponse.js";
 import { getValidatedSort } from "../Services/sortService.js";
@@ -13,6 +12,8 @@ import { getPagination } from "../Services/paginationServices.js";
 
 export const handlecreateDoctor = async (req, res, next) => {
         try{
+
+            console.log("Reached controller");
             const {id:staff_id} = req.params;
         const {specialization, yearsOfExperience, clinicHours, consultingDay, licenseNum} = req.body;
         if(!staff_id || !specialization || yearsOfExperience === undefined || !clinicHours || !licenseNum){
@@ -30,12 +31,11 @@ const error = new Error("All fields are required");
         
         const doctorExists = await Doctor.findOne({staff: staff_id});
         if(doctorExists){
-            if (doctorExists) {
     const error = new Error("Doctor account already exists");
-    error.statusCode = 400;
+    error.statusCode = 409;
     return next(error);
 }
-        }
+        
 
         const staffExists = await Staff.findById(staff_id);
         if(!staffExists){
@@ -63,7 +63,7 @@ const error = new Error("All fields are required");
 );
         
         }catch (error) {
-             next(error);
+        return     next(error);
         }
 }
 export const handlegetAllDoctors = async (req, res, next) => {
@@ -169,7 +169,12 @@ export const handlegetDoctorById = async (req, res, next) => {
             doctor
         );
        } catch (error) {
-            next(error);    
+        console.error("FULL ERROR:", error);
+    console.error("MESSAGE:", error.message);
+    console.error("STACK:", error.stack);
+        console.log(error)
+        
+         return   next(error);    
     }
 }
 export const handledeleteDoctor = async (req, res, next) => {
@@ -197,7 +202,9 @@ export const handledeleteDoctor = async (req, res, next) => {
             deletedDoctor
         );
         } catch (error) {
-            next(error) 
+
+   return next(error);
+             
     }
 }
 export const handleupdatedoctor = async (req, res, next) => {
@@ -224,6 +231,6 @@ export const handleupdatedoctor = async (req, res, next) => {
             "Doctor updated successfully",
             updatedDoctor
         );} catch(error) {
-        next(error) 
+      return  next(error) 
         }
     }

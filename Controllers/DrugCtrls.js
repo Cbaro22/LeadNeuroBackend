@@ -116,7 +116,7 @@ const responseData = {
 
 cache.set(cacheKey, responseData);
 
-   cache.flushAll()
+
 
     return successResponse(
     res,
@@ -190,7 +190,7 @@ export const handleGetDrugsByBrandAndGenericName = async (req, res, next) => {
 export const handleUpdateDrug = async (req, res, next) => {
     try{
         const { id } = req.params;
-    const { genericName, therapeuticClass, indications, contraindications, sideEffects, interactions, route, brandName, manufacturer, dosageForm, strength, nafdacNumber, costPrice, minimumStockLevel, isActive } = req.body;  
+    const { genericName, therapeuticClass, indications, contraindications, sideEffects, interactions, route, brandName, manufacturer, dosageForm,sellingPrice, strength, nafdacNumber, costPrice, minimumStockLevel, isActive } = req.body;  
     
     
 if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -206,7 +206,10 @@ const drug = await Drugs.findById(id);
             error.statusCode = 404;
             return next(error);
     }
-    const updatedDrug = await Drugs.findByIdAndUpdate(id,  {genericName, therapeuticClass, indications, contraindications, sideEffects, interactions, route, brandName, manufacturer, dosageForm, strength, nafdacNumber, costPrice, minimumStockLevel, isActive,sellingPrice}, { new: true });
+    const updatedDrug = await Drugs.findByIdAndUpdate(id,  {genericName, therapeuticClass, indications, contraindications, sideEffects, interactions, route, brandName, manufacturer, dosageForm, strength, nafdacNumber, costPrice, minimumStockLevel, isActive,sellingPrice}, { new: true },{
+        returnDocument: "after",
+        runValidators: true
+    });
 
         cache.flushAll()
 
@@ -226,7 +229,7 @@ export const handleDeleteDrug = async (req, res, next) => {
     try{
         const { id } = req.params;
 
-if(mongoose.Types.ObjectId.isValid(id)){
+if(!mongoose.Types.ObjectId.isValid(id)){
     const error = new Error("Invalid drug ID");
     error.statusCode = 400;
     return next(error);

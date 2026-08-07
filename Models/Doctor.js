@@ -4,15 +4,15 @@ const doctorSchema = new mongoose.Schema({
     staff:{
        type:mongoose.Schema.Types.ObjectId,
        ref:"Staff",
-       require:true
+       required:true
     },
     specialization:{
         type:String,
-        require:true
+        required:true
     },
     licenseNum:{
         type:String,
-        require:true
+        required:true
     },
     yearsOfExperience:{type:Number, required:true},
     consultingDay:String,

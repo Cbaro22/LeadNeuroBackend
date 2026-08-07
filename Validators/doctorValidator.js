@@ -1,6 +1,10 @@
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 
 export const createDoctorValidator = [
+
+    param("id")
+        .isMongoId()
+        .withMessage("Invalid Staff ID"),
 
     body("specialization")
         .notEmpty()
@@ -18,7 +22,5 @@ export const createDoctorValidator = [
         .notEmpty()
         .withMessage("Clinic hours are required"),
 
-    body("staff")
-        .isMongoId()
-        .withMessage("Invalid Staff ID")
+    
 ];

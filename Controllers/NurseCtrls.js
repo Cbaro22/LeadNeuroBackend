@@ -26,7 +26,7 @@ export const handledeleteNurse = async (req, res, next) => {
             return next(error)
         }
 
-        const deletedNurse = await Nurse.findByIdAndDelete({staff:staff_id});
+        const deletedNurse = await Nurse.findOneAndDelete({staff:staff_id});
 
             cache.flushAll()
 
@@ -43,8 +43,8 @@ export const handledeleteNurse = async (req, res, next) => {
 export const handlecreateNurse = async (req, res, next) => {
     try{
         const { id: staff_id } = req.params;
-        const { department, shift, supervisor, workSchedule} = req.body;
-        if(!staff_id || !department || !shift || !supervisor || !workSchedule){
+      const { certification,wardAssigned,shift,yearsOfExperience,licenseNum,supervisor} = req.body;
+        if( !certification|| !shift || !supervisor || !wardAssigned || !yearsOfExperience || !licenseNum  ){
             const error = new Error("All fields are required");
             error.statusCode = 400;
             return next(error)};
@@ -70,11 +70,16 @@ export const handlecreateNurse = async (req, res, next) => {
             }
 
             const nurse = await Nurse.create({
-                staff: staff_id,
-                department, shift, supervisor, workSchedule
-            });
-
+    staff: staff_id,
+    certification,
+    wardAssigned,
+    shift,
+    yearsOfExperience,
+    licenseNum
+});
                cache.flushAll()
+
+            console.log(res.body);
 
             return successResponse(
     res,
@@ -88,32 +93,36 @@ export const handlecreateNurse = async (req, res, next) => {
         }
     }
 
-
-    
 export const handlegetAllNurses = async (req, res, next) => {
     try{
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
     const selectedFields = getSelectedFields(req.query.fields);
     const filter = getValidatedFilter(req.query, {
-    department: "regex",
+    
+    certification: "exact",
+    wardAssigned: "regex",
     shift: "exact",
     supervisor: "regex"
 });
 
+
 const searchQuery = getSearchQuery(req.query.search, [
-    "department",
-    "shift",
-    "supervisor",
-    "workSchedule"
+"certification",
+"wardAssigned",
+"shift",
+"licenseNum",
+"supervisor",
 ]);
     
     const allowedSortFields = [
-    "department",
+    "licenseNum",
     "shift",
+    "yearsOfExperience",
+    "wardAssigned",
     "supervisor",
-    "workSchedule",
     "createdAt"
+
 ];
 
 const sort = getValidatedSort(req.query.sort, allowedSortFields);
@@ -199,26 +208,28 @@ export const handlegetNurseById = async (req, res, next) => {
 
 export const handleUpdateNurse = async(req, res, next) => {
     try {
-        const {id} = req.params;
-        const {staff_id, department, shift, supervisor, workSchedule} = req.body;
-        if(!staff_id || !department || !shift || !supervisor || !workSchedule){
-            const error = new Error("All fields are required");
-            error.statusCode = 400;
-            return next(error)};
-
+        const {id:staff_id} = req.params;
+        const {certification,wardAssigned,shift,yearsOfExperience,licenseNum,supervisor} = req.body;
+        
             if(!mongoose.Types.ObjectId.isValid(staff_id)){
             const error = new Error("Invalid staff ID");
             error.statusCode = 400;
             return next(error);
         }
-        const nurse = await Nurse.findOne({id:staff_id})
+        const nurse = await Nurse.findOne({staff:staff_id})
         if(!nurse){
             const error = new Error("Nurse not found");
             error.statusCode = 404;
             return next(error);
         }
 
-        const updatedNurse = await Nurse.findByIdAndUpdate(id,{staff:staff_id, department, shift, supervisor, workSchedule}, {new: true}).populate("staff", "name email");
+        if( !certification|| !shift || !supervisor || !wardAssigned || !yearsOfExperience || !licenseNum){
+            const error = new Error("All fields are required");
+            error.statusCode = 400;
+            return next(error)};
+
+        const updatedNurse = await Nurse.findOneAndUpdate({staff:staff_id},{certification,wardAssigned, shift,supervisor,
+yearsOfExperience,licenseNum}, {returnDocument: "after"}).populate("staff", "name email");
 
           cache.flushAll()
 
@@ -227,7 +238,7 @@ export const handleUpdateNurse = async(req, res, next) => {
     200,
     "Nurse updated successfully",
     updatedNurse
-);;
+);
     } catch (error) {
         next(error)
     }

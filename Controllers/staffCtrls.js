@@ -24,31 +24,20 @@ import { getPagination } from "../Services/paginationServices.js"
 export const handleCreateStaff = async(req,res,next)=>{
 
     try {
-        const{role,password,email,doctorData,nurseData,cleanerData,...staffData}=req.body
+        const{role,password,email,...staffData}=req.body
 
     
     const existingStaff = await Staff.findOne({email})
     if(existingStaff){
         const error = new Error("Staff Account already exists");
-        error.statusCode = 400;
+        error.statusCode = 409;
         return next(error);
     }
        
     const hashedPassword = await bcrypt.hash(password,10)
     const newStaff= await Staff.create({...staffData,role, email, password:hashedPassword,})
 
-    let roleData;
 
-    if(role==="doctor"){
-        roleData = (await Doctor.create({staff:newStaff._id,...doctorData}))
-    }
-
-    else if(role==="nurse"){
-        roleData = await Nurse.create({staff:newStaff._id,...nurseData})
-    }
-    else if(role==="cleaner"){
-        roleData = await Cleaner.create({staff:newStaff._id,...cleanerData})
-    }
 
     await registerationEmail(newStaff.email)
 
@@ -60,13 +49,12 @@ export const handleCreateStaff = async(req,res,next)=>{
     "Staff created successfully",
     {
         staff: newStaff,
-        roleData,
         accessToken: generateAccessToken(newStaff),
         refreshToken: generateRefreshToken(newStaff)
     }
 );
     } catch (error) {
-        next(error)
+       return next(error)
     }
 }
 
@@ -155,50 +143,38 @@ return successResponse(
     responseData
 );
    } catch (error) {
-    next(error)
+  return  next(error)
    }
 }
 
 export const handleGetStaffById = async(req,res,next)=>{
     try{
         const {id}= req.params
-    const staff = await Staff.findById(id)
-    if(!staff){
+
+if (!mongoose.Types.ObjectId.isValid(id)) {
+    const error = new Error("Invalid staff ID");
+    error.statusCode = 400;
+    return next(error);
+}
+         const staff = await Staff.findById(id)
+
+ if(!staff){
         const error = new Error("Staff not found");
         error.statusCode = 404;
         return next(error);
     };
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-    const error = new Error("Invalid staff ID");
-    error.statusCode = 400;
-    return next(error);
-}
-
- let roleData = null;
-
-    if(staff.role === "doctor"){
-         roleData = await Doctor.findOne({staff:staff._id})
-        
-}
-    else if(staff.role ==="nurse"){
-         roleData = await Nurse.findOne({staff:staff._id})
-    }
-    else if(staff.role ==="cleaner"){
-         roleData = await Cleaner.findOne({staff:staff._id})
-    }
-
+    
     return successResponse(
     res,
     200,
     "Staff retrieved successfully",
     {
-        staff,
-        roleData
+        staff
     }
 );
     }catch (error){
-        next(error)
+     return   next(error)
         }
 
 }
@@ -229,21 +205,23 @@ try{
     const accessToken = generateAccessToken(staff)
     const refreshToken=generateRefreshToken(staff)
 
-    console.log("Access Token:", accessToken);
+    
 
 
     await loginEmail(staff.email)
-    return res.status(200).json({
-    success: true,
-    message: "Login successful",
-    data: {
+
+    return successResponse(
+    res,
+    200,
+    "Login successful",
+    {
         staff,
         accessToken,
         refreshToken
     }
-});;
+);;
 }catch(error){
-    next(error)
+  return  next(error)
 }
 }
 
@@ -275,8 +253,12 @@ export const handleForgotPassword = async(req,res, next)=>{
     }
 );
     }catch(error){
-        next(error)
-    }
+
+    console.error("LOGIN ERROR");
+    console.error(error);
+    return next(error);
+}
+      
 }
 export const handleResetPassword = async(req,res, next)=>{ 
        try{
@@ -316,7 +298,7 @@ export const handleResetPassword = async(req,res, next)=>{
 );
 
        }catch(error){
-        next(error)
+      return  next(error)
        }
     }
 export const handleDeleteStaff = async(req,res, next)=>{
@@ -350,42 +332,61 @@ const staff = await Staff.findById(id)
 );
         } catch(error){
             console.error("Error deleting staff:", error);
-            next(error)
+          return  next(error)
         }
     
     }
-export const handleUpdateStaff = async(req,res,next)=>{
-       try{
-        const {id} = req.params;
-        const {name,email,phone, Address} = req.body
+export const handleUpdateStaff = async (req, res, next) => {
+  try {
+    const { id } = req.params;
 
-if(!mongoose.Types.ObjectId.isValid(id)){
-    const error = new Error("Invalid staff ID");
-    error.statusCode = 400;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      const error = new Error("Invalid staff ID");
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    const staff = await Staff.findById(id);
+
+    if (!staff) {
+      const error = new Error("Staff not found");
+      error.statusCode = 404;
+      return next(error);
+    }
+
+    const {
+      name,
+      email,
+      phone,
+      Address,
+      department,
+      role,
+      salary,
+    } = req.body;
+
+    const updatedStaff = await Staff.findByIdAndUpdate(
+      id,
+      {
+        name,
+        email,
+        phone,
+        Address,
+        department,
+        role,
+        salary,
+      },
+      { new: true, runValidators: true }
+    );
+
+    cache.flushAll();
+
+    return successResponse(
+      res,
+      200,
+      "Staff updated successfully",
+      updatedStaff
+    );
+  } catch (error) {
     return next(error);
-}
-
-        const staff = await Staff.findById(id)
-
-    
-
-        if(!staff){
-            const error = new Error("Staff not found");
-            error.statusCode = 404;
-            return next(error); 
-        }
-        const updatedStaff = await Staff.findByIdAndUpdate(id, {name,email,phone, Address},{new:true})
-
-        cache.flushAll()
-
-        
-        return successResponse(
-    res,
-    200,
-    "Staff updated successfully",
-    updatedStaff
-);
-       } catch(error){
-        next(error)
-       }
-    }
+  }
+};

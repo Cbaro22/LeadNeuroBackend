@@ -77,7 +77,7 @@ const router = express.Router()
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
-router.post('/create_Cleaner/:id', createCleanerValidator, validate, handlecreatecleaner)
+router.post('/create_Cleaner/:staff_id', createCleanerValidator, validate, handlecreatecleaner)
 
 /**
  * @swagger

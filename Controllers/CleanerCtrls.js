@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import Cleaner from "../Models/Cleaner.js";
 import Staff from "../Models/Staff.js";
 import { successResponse } from "../Services/apiResponse.js";
-import { errorResponse } from "../Services/apiResponse.js";
 import { getValidatedSort } from "../Services/sortService.js";
 import { getValidatedFilter } from "../Services/filterService.js";
 import { getSearchQuery } from "../Services/searchServices.js";
@@ -13,7 +12,7 @@ import { getPagination } from "../Services/paginationServices.js";
 
 export const handlecreatecleaner = async (req, res, next) => {
 
-        try{const {id:staff_id} = req.params;
+        try{const {staff_id} = req.params;
         const {shift, supervisor,areaAssigned,workSchedule} = req.body;
         if(!staff_id || !shift || !supervisor || !areaAssigned || !workSchedule){
             const error = new Error("All fields are required");
@@ -53,7 +52,7 @@ return next(error);
     cleaner
 );}
          catch(error){
-          next(error)
+         return next(error)
         }
     } 
     
@@ -135,7 +134,7 @@ cache.set(cacheKey, responseData);
     responseData
 );
     } catch(error){
-        next(error)
+      return  next(error)
     }
         
     }
@@ -163,7 +162,7 @@ export const handlegetCleanerById = async (req, res, next) => {
     cleaner
 );
         } catch (error) {
-            next(error)
+        return    next(error)
         }
     }
 
@@ -193,7 +192,7 @@ export const handledeleteCleaner = async (req, res, next) => {
     deletedCleaner
 );
 } catch (error) {
-            next(error)
+        return    next(error)
         }
     }
 
@@ -219,7 +218,8 @@ export const handleupdateCleaner = async (req, res, next) => {
             return next(error);
            
         }
-        const updatedCleaner = await Cleaner.findOneAndUpdate({staff: staff_id}, {shift,supervisor ,areaAssigned ,workSchedule}, {new: true}).populate("staff", "name email");
+        const updatedCleaner = await Cleaner.findOneAndUpdate({staff: staff_id}, {shift,supervisor ,areaAssigned ,workSchedule},{ returnDocument: "after" }
+ ).populate("staff", "name email");
 
         cache.flushAll()
 
@@ -231,7 +231,7 @@ export const handleupdateCleaner = async (req, res, next) => {
     updatedCleaner
 );
     } catch (error) {
-        next(error)
+     return   next(error)
     }
 }
     

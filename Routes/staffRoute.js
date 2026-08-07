@@ -278,7 +278,7 @@ router.post('/Forgot_password',passwordLimiter, handleForgotPassword)
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/one_Staff/:id',authentication, Authorization("admin"), handleGetStaffById)
+router.get('/one_Staff/:id',authentication, Authorization("admin" ), handleGetStaffById)
 
 /**
  * @swagger
