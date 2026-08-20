@@ -196,42 +196,64 @@ export const handledeleteCleaner = async (req, res, next) => {
         }
     }
 
-export const handleupdateCleaner = async (req, res, next) => {
-        try {
-            const {id:staff_id} = req.params;
-            const {shift, supervisor,areaAssigned,workSchedule } = req.body;
-            if(!staff_id || !shift || !supervisor || !areaAssigned || !workSchedule){
-                const error = new Error("All fields are required");
-                error.statusCode = 400;
-                return next(error);
-            }
-                
-            if(!mongoose.Types.ObjectId.isValid(staff_id)){
+   export const handleupdateCleaner = async (req, res, next) => {
+    try {
+        const { id: staff_id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(staff_id)) {
             const error = new Error("Invalid staff ID");
             error.statusCode = 400;
-            return next(error); 
-        } 
-        const cleaner = await Cleaner.findOne({staff: staff_id});
-        if(!cleaner){
+            return next(error);
+        }
+
+        const cleaner = await Cleaner.findOne({ staff: staff_id });
+
+        if (!cleaner) {
             const error = new Error("Cleaner not found");
             error.statusCode = 404;
             return next(error);
-           
         }
-        const updatedCleaner = await Cleaner.findOneAndUpdate({staff: staff_id}, {shift,supervisor ,areaAssigned ,workSchedule},{ returnDocument: "after" }
- ).populate("staff", "name email");
 
-        cache.flushAll()
+        const allowedFields = [
+            "shift",
+            "supervisor",
+            "areaAssigned",
+            "workSchedule"
+        ];
 
+        const updateData = {};
+
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) {
+                updateData[field] = req.body[field];
+            }
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            const error = new Error("No fields provided for update");
+            error.statusCode = 400;
+            return next(error);
+        }
+
+        const updatedCleaner = await Cleaner.findOneAndUpdate(
+            { staff: staff_id },
+            updateData,
+            {
+                new: true,
+                runValidators: true
+            }
+        ).populate("staff", "name email");
+
+        cache.flushAll();
 
         return successResponse(
-    res,
-    200,
-    "Cleaner updated successfully",
-    updatedCleaner
-);
+            res,
+            200,
+            "Cleaner updated successfully",
+            updatedCleaner
+        );
+
     } catch (error) {
-     return   next(error)
+        return next(error);
     }
-}
-    
+};

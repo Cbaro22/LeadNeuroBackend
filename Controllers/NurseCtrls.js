@@ -37,14 +37,14 @@ export const handledeleteNurse = async (req, res, next) => {
     deletedNurse
 );;
     } catch(error){
-            next(error)
+         return   next(error)
         }
     }
 export const handlecreateNurse = async (req, res, next) => {
     try{
         const { id: staff_id } = req.params;
       const { certification,wardAssigned,shift,yearsOfExperience,licenseNum,supervisor} = req.body;
-        if( !certification|| !shift || !supervisor || !wardAssigned || !yearsOfExperience || !licenseNum  ){
+        if( !certification|| !shift || !supervisor || !wardAssigned || yearsOfExperience === undefined|| !licenseNum  ){
             const error = new Error("All fields are required");
             error.statusCode = 400;
             return next(error)};
@@ -75,7 +75,8 @@ export const handlecreateNurse = async (req, res, next) => {
     wardAssigned,
     shift,
     yearsOfExperience,
-    licenseNum
+    licenseNum,
+    supervisor
 });
                cache.flushAll()
 
@@ -202,47 +203,73 @@ export const handlegetNurseById = async (req, res, next) => {
     nurse
 );;
     } catch(error){
-            next(error)
+         return   next(error)
         }
     }
 
-export const handleUpdateNurse = async(req, res, next) => {
+export const handleUpdateNurse = async (req, res, next) => {
     try {
-        const {id:staff_id} = req.params;
-        const {certification,wardAssigned,shift,yearsOfExperience,licenseNum,supervisor} = req.body;
-        
-            if(!mongoose.Types.ObjectId.isValid(staff_id)){
+        const { id: staff_id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(staff_id)) {
             const error = new Error("Invalid staff ID");
             error.statusCode = 400;
             return next(error);
         }
-        const nurse = await Nurse.findOne({staff:staff_id})
-        if(!nurse){
+
+        const nurse = await Nurse.findOne({ staff: staff_id });
+
+        if (!nurse) {
             const error = new Error("Nurse not found");
             error.statusCode = 404;
             return next(error);
         }
 
-        if( !certification|| !shift || !supervisor || !wardAssigned || !yearsOfExperience || !licenseNum){
-            const error = new Error("All fields are required");
+        const allowedFields = [
+            "certification",
+            "wardAssigned",
+            "shift",
+            "yearsOfExperience",
+            "licenseNum",
+            "supervisor"
+        ];
+
+        const updateData = {};
+
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) {
+                updateData[field] = req.body[field];
+            }
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            const error = new Error("No fields provided for update");
             error.statusCode = 400;
-            return next(error)};
+            return next(error);
+        }
 
-        const updatedNurse = await Nurse.findOneAndUpdate({staff:staff_id},{certification,wardAssigned, shift,supervisor,
-yearsOfExperience,licenseNum}, {returnDocument: "after"}).populate("staff", "name email");
+        const updatedNurse = await Nurse.findOneAndUpdate(
+            { staff: staff_id },
+            updateData,
+            {
+                new: true,
+                runValidators: true
+            }
+        ).populate("staff", "name email");
 
-          cache.flushAll()
+        cache.flushAll();
 
         return successResponse(
-    res,
-    200,
-    "Nurse updated successfully",
-    updatedNurse
-);
+            res,
+            200,
+            "Nurse updated successfully",
+            updatedNurse
+        );
+
     } catch (error) {
-        next(error)
+        return next(error);
     }
-}
+};
 
 
  

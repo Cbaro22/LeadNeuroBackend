@@ -38,10 +38,50 @@ export const createStaffValidator = [
         .withMessage("Department is required"),
 
     body("salary")
-        .isNumeric()
-        .withMessage("Salary must be a number"),
+    .isFloat({ min: 0 })
+    .withMessage("Salary must be a non-negative number"),
 
     body("role")
         .isIn(["admin","doctor","nurse","cleaner"])
         .withMessage("Invalid role")
+];
+
+
+export const updateStaffValidator = [
+    body("name")
+        .optional()
+        .trim()
+        .notEmpty()
+        .withMessage("Name cannot be empty")
+        .isLength({ min: 3 })
+        .withMessage("Name must be at least 3 characters"),
+
+    body("email")
+        .optional()
+        .trim()
+        .isEmail()
+        .withMessage("Please provide a valid email")
+        .normalizeEmail(),
+
+    body("phone")
+        .optional()
+        .trim(),
+
+    body("Address")
+        .optional()
+        .trim(),
+
+    body("department")
+        .optional()
+        .trim(),
+
+    body("role")
+        .optional()
+        .isIn(["admin", "doctor", "nurse", "cleaner"])
+        .withMessage("Invalid role"),
+
+    body("salary")
+        .optional()
+        .isFloat({ min: 0 })
+        .withMessage("Salary must be a non-negative number")
 ];

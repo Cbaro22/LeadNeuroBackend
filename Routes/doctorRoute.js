@@ -2,14 +2,14 @@ import express from 'express'
 import {   authentication, Authorization } from '../Middlewares/ValidateStaff.js'
 import { handlecreateDoctor, handledeleteDoctor, handlegetAllDoctors, handlegetDoctorById, handleupdatedoctor } from '../Controllers/DoctorCtrls.js'
 import { validate } from '../Validators/validate.js'
-import { createDoctorValidator } from '../Validators/doctorValidator.js'
+import { createDoctorValidator, updateDoctorValidator } from '../Validators/doctorValidator.js'
 
 const router = express.Router()
 
 
 /**
  * @swagger
- * /api/doctor/create_Doctor/{id}:
+ * /doctor/create_Doctor/{id}:
  *   post:
  *     summary: Create doctor profile
  *     description: Creates a doctor profile for an existing staff member. Only administrators can perform this operation.
@@ -78,11 +78,11 @@ const router = express.Router()
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/create_Doctor/:id',authentication, createDoctorValidator, validate, handlecreateDoctor)
+router.post('/create_Doctor/:id',authentication,Authorization("admin"), createDoctorValidator, validate, handlecreateDoctor)
 
 /**
  * @swagger
- * /api/doctor/get_Doctors:
+ * /doctor/get_Doctors:
  *   get:
  *     summary: Retrieve all doctors
  *     description: Returns a list of all registered doctors along with their associated staff information. Only administrators can access this endpoint.
@@ -122,11 +122,11 @@ router.post('/create_Doctor/:id',authentication, createDoctorValidator, validate
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
-router.get('/get_Doctors',authentication,Authorization("admin"), handlegetAllDoctors)
+router.get('/get_Doctors',authentication,Authorization("admin", "doctor"), handlegetAllDoctors)
 
 /**
  * @swagger
- * /api/doctor/get_Doctor/{id}:
+ * /doctor/get_Doctor/{id}:
  *   get:
  *     summary: Retrieve a doctor by ID
  *     description: Retrieves a single doctor's profile, including the associated staff information. Accessible by administrators and doctors.
@@ -193,7 +193,7 @@ router.get('/get_Doctor/:id',authentication,Authorization("admin", "doctor"), ha
 
 /**
  * @swagger
- * /api/doctor/delete_Doctor/{id}:
+ * /doctor/delete_Doctor/{id}:
  *   delete:
  *     summary: Delete a doctor profile
  *     description: Deletes a doctor's profile from the system. Only administrators can perform this operation.
@@ -260,7 +260,7 @@ router.delete('/delete_Doctor/:id',authentication,Authorization("admin"), handle
 
 /**
  * @swagger
- * /api/doctor/update_Doctor/{id}:
+ * /doctor/update_Doctor/{id}:
  *   put:
  *     summary: Update a doctor's profile
  *     description: Updates an existing doctor's profile. Only administrators can perform this operation.
@@ -330,6 +330,6 @@ router.delete('/delete_Doctor/:id',authentication,Authorization("admin"), handle
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
-router.put('/update_Doctor/:id',authentication,Authorization("admin"), handleupdatedoctor)
+router.put('/update_Doctor/:id',authentication,Authorization("admin"),updateDoctorValidator, validate, handleupdatedoctor)
 
 export default router;

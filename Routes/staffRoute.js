@@ -3,7 +3,7 @@ import { Authorization } from "../Middlewares/ValidateStaff.js"
 import { authentication } from "../Middlewares/ValidateStaff.js"
 import { handleCreateStaff, handleLoginStaff, handleGetAllStaff, handleForgotPassword, handleGetStaffById, handleResetPassword, handleUpdateStaff, handleDeleteStaff } from "../Controllers/staffCtrls.js"
 import { validate } from "../Validators/validate.js"
-import { createStaffValidator } from "../Validators/staffValidator.js"
+import { createStaffValidator, updateStaffValidator } from "../Validators/staffValidator.js"
 import { authLimiter } from "../Middlewares/authLimiter.js"
 import { passwordLimiter } from "../Middlewares/passwordLimiter.js"
 
@@ -11,16 +11,16 @@ import { passwordLimiter } from "../Middlewares/passwordLimiter.js"
 
  /**
  * @swagger
- * /api/staff/register:
+ * /staff/register:
  *   post:
  *     summary: Register a new staff member
  *     description: |
  *       Creates a new staff account in the Lead Neuro Backend system.
  *
- *       This endpoint is used to register doctors, nurses, cleaners and administrators.
+ *       Staff can be registered with one of the following roles:
+ *       admin, doctor, nurse, or cleaner.
  *
  *       The email address must be unique.
- *
  *     tags:
  *       - Authentication
  *
@@ -29,59 +29,53 @@ import { passwordLimiter } from "../Middlewares/passwordLimiter.js"
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *               - email
- *               - password
- *               - role
- *             properties:
- *               name:
- *                 type: string
- *                 example: John Doe
- *               email:
- *                 type: string
- *                 example: johndoe@gmail.com
- *               password:
- *                 type: string
- *                 example: Password123
- *               phone:
- *                 type: string
- *                 example: 08012345678
- *               address:
- *                 type: string
- *                 example: Lagos
- *               role:
- *                 type: string
- *                 enum:
- *                   - admin
- *                   - doctor
- *                   - nurse
- *                   - cleaner
- *               department:
- *                 type: string
- *                 example: Neurology
- *               salary:
- *                 type: number
- *                 example: 250000
+ *             $ref: '#/components/schemas/CreateStaffRequest'
+ *
  *     responses:
  *       201:
- *         description: Staff registered successfully.
+ *         description: Staff created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CreateStaffResponse'
  *
  *       400:
- *         description: Validation error.
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *
  *       409:
- *         description: Email already exists.
+ *         description: Staff account already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/register',createStaffValidator,validate, handleCreateStaff)
+router.post(
+    '/register',
+    createStaffValidator,
+    validate,
+    handleCreateStaff
+);
+
 
 /**
  * @swagger
- * /api/staff/login:
+ * /staff/login:
  *   post:
  *     summary: Authenticate a staff member
- *     description: Logs in a registered staff member using email and password and returns JWT access and refresh tokens.
+ *     description: |
+ *       Authenticates a registered staff member using their email
+ *       and password and returns access and refresh JWT tokens.
  *     tags:
  *       - Authentication
  *
@@ -101,7 +95,7 @@ router.post('/register',createStaffValidator,validate, handleCreateStaff)
  *               $ref: '#/components/schemas/LoginResponse'
  *
  *       400:
- *         description: Missing email or password
+ *         description: Email and password are required
  *         content:
  *           application/json:
  *             schema:
@@ -128,19 +122,91 @@ router.post('/register',createStaffValidator,validate, handleCreateStaff)
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/login',authLimiter, handleLoginStaff)
+router.post(
+    '/login',
+    authLimiter,
+    handleLoginStaff
+);
+
 
 /**
  * @swagger
- * /api/staff/all_Staff:
+ * /staff/all_Staff:
  *   get:
  *     summary: Retrieve all staff members
- *     description: Returns a list of all staff members. Only administrators can access this endpoint.
+ *     description: |
+ *       Retrieves a paginated list of staff members.
+ *       Only administrators can access this endpoint.
+ *
+ *       Supports filtering, searching, sorting, field selection,
+ *       and pagination through query parameters.
  *     tags:
  *       - Staff
  *
  *     security:
  *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number.
+ *
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: Number of staff records per page.
+ *
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by name, email, or department.
+ *
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Filter staff by name.
+ *
+ *       - in: query
+ *         name: department
+ *         schema:
+ *           type: string
+ *         description: Filter staff by department.
+ *
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum:
+ *             - admin
+ *             - doctor
+ *             - nurse
+ *             - cleaner
+ *         description: Filter staff by role.
+ *
+ *       - in: query
+ *         name: fields
+ *         schema:
+ *           type: string
+ *         description: Comma-separated list of fields to return.
+ *
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *         description: |
+ *           Sort fields. Supported fields include:
+ *           name, email, department, salary, role,
+ *           createdAt, and dateEmployed.
  *
  *     responses:
  *       200:
@@ -171,14 +237,22 @@ router.post('/login',authLimiter, handleLoginStaff)
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/all_Staff',authentication, Authorization("admin"),handleGetAllStaff)
+router.get(
+    '/all_Staff',
+    authentication,
+    Authorization("admin"),
+    handleGetAllStaff
+);
+
 
 /**
  * @swagger
- * /api/staff/Forgot_password:
+ * /staff/Forgot_password:
  *   post:
  *     summary: Request a password reset
- *     description: Generates a password reset token and sends a password reset email to the registered staff email address.
+ *     description: |
+ *       Generates a password reset token for the staff member
+ *       and sends a password reset email to the registered email address.
  *     tags:
  *       - Authentication
  *
@@ -191,18 +265,11 @@ router.get('/all_Staff',authentication, Authorization("admin"),handleGetAllStaff
  *
  *     responses:
  *       200:
- *         description: Password reset email sent successfully
+ *         description: Password reset email sent
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ForgotPasswordResponse'
- *
- *       400:
- *         description: Invalid request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
  *
  *       404:
  *         description: Staff account not found
@@ -218,15 +285,21 @@ router.get('/all_Staff',authentication, Authorization("admin"),handleGetAllStaff
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/Forgot_password',passwordLimiter, handleForgotPassword)
+router.post(
+    '/Forgot_password',
+    passwordLimiter,
+    handleForgotPassword
+);
 
 
 /**
  * @swagger
- * /api/staff/one_Staff/{id}:
+ * /staff/one_Staff/{id}:
  *   get:
  *     summary: Retrieve a staff member by ID
- *     description: Retrieves a single staff member and any associated role-specific information (Doctor, Nurse, or Cleaner). Only administrators can access this endpoint.
+ *     description: |
+ *       Retrieves a single staff member using the MongoDB ObjectId.
+ *       Only administrators can access this endpoint.
  *     tags:
  *       - Staff
  *
@@ -237,7 +310,7 @@ router.post('/Forgot_password',passwordLimiter, handleForgotPassword)
  *       - in: path
  *         name: id
  *         required: true
- *         description: MongoDB ObjectId of the staff member
+ *         description: MongoDB ObjectId of the staff member.
  *         schema:
  *           type: string
  *           example: "686f6b8d2b45d12e85d88d1a"
@@ -249,6 +322,13 @@ router.post('/Forgot_password',passwordLimiter, handleForgotPassword)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/GetStaffByIdResponse'
+ *
+ *       400:
+ *         description: Invalid staff ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *
  *       401:
  *         description: Unauthorized - Missing or invalid access token
@@ -278,14 +358,22 @@ router.post('/Forgot_password',passwordLimiter, handleForgotPassword)
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/one_Staff/:id',authentication, Authorization("admin" ), handleGetStaffById)
+router.get(
+    '/one_Staff/:id',
+    authentication,
+    Authorization("admin"),
+    handleGetStaffById
+);
+
 
 /**
  * @swagger
- * /api/staff/reset_password:
+ * /staff/reset_password:
  *   patch:
  *     summary: Reset a staff password
- *     description: Resets a staff member's password using the email address, password reset token, and a new password.
+ *     description: |
+ *       Resets a staff member's password using the email address,
+ *       password reset token, and new password.
  *     tags:
  *       - Authentication
  *
@@ -298,11 +386,11 @@ router.get('/one_Staff/:id',authentication, Authorization("admin" ), handleGetSt
  *
  *     responses:
  *       200:
- *         description: Password reset successfully
+ *         description: Password reset successful
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/SuccessResponse'
+ *               $ref: '#/components/schemas/ResetPasswordResponse'
  *
  *       404:
  *         description: Invalid or expired reset token
@@ -318,15 +406,23 @@ router.get('/one_Staff/:id',authentication, Authorization("admin" ), handleGetSt
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
+router.patch(
+    '/reset_password',
+    handleResetPassword
+);
 
-router.patch('/reset_password', handleResetPassword)
 
 /**
  * @swagger
- * /api/staff/update/{id}:
+ * /staff/update/{id}:
  *   put:
  *     summary: Update a staff member
- *     description: Updates the details of an existing staff member. Only administrators can perform this operation.
+ *     description: |
+ *       Updates an existing staff member.
+ *       Only administrators can perform this operation.
+ *
+ *       Only the fields accepted by the Staff update validator
+ *       can be updated.
  *     tags:
  *       - Staff
  *
@@ -337,7 +433,7 @@ router.patch('/reset_password', handleResetPassword)
  *       - in: path
  *         name: id
  *         required: true
- *         description: MongoDB ObjectId of the staff member
+ *         description: MongoDB ObjectId of the staff member.
  *         schema:
  *           type: string
  *           example: "686f6b8d2b45d12e85d88d1a"
@@ -392,14 +488,25 @@ router.patch('/reset_password', handleResetPassword)
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.put('/update/:id', authentication, Authorization("admin"),  handleUpdateStaff)
+router.put(
+    '/update/:id',
+    authentication,
+    Authorization("admin"),
+    updateStaffValidator,
+    validate,
+    handleUpdateStaff
+);
+
 
 /**
  * @swagger
- * /api/staff/delete/{id}:
+ * /staff/delete/{id}:
  *   delete:
  *     summary: Delete a staff member
- *     description: Deletes a staff member from the system and sends a notification email. Only administrators can perform this operation.
+ *     description: |
+ *       Permanently deletes a staff member from the system.
+ *       A notification email is sent to the deleted staff member.
+ *       Only administrators can perform this operation.
  *     tags:
  *       - Staff
  *
@@ -410,7 +517,7 @@ router.put('/update/:id', authentication, Authorization("admin"),  handleUpdateS
  *       - in: path
  *         name: id
  *         required: true
- *         description: MongoDB ObjectId of the staff member
+ *         description: MongoDB ObjectId of the staff member.
  *         schema:
  *           type: string
  *           example: "686f6b8d2b45d12e85d88d1a"
@@ -421,7 +528,7 @@ router.put('/update/:id', authentication, Authorization("admin"),  handleUpdateS
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/DeleteResponse'
+ *               $ref: '#/components/schemas/DeleteStaffResponse'
  *
  *       400:
  *         description: Invalid staff ID
@@ -458,8 +565,12 @@ router.put('/update/:id', authentication, Authorization("admin"),  handleUpdateS
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.delete('/delete/:id',authentication, Authorization("admin"), handleDeleteStaff)
-    
+router.delete(
+    '/delete/:id',
+    authentication,
+    Authorization("admin"),
+    handleDeleteStaff
+);
 export default router;
 
 

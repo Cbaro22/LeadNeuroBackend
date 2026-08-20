@@ -1,7 +1,7 @@
 import express from "express"
 import {authentication,  Authorization } from "../Middlewares/ValidateStaff.js"
 import { handlecreatecleaner, handledeleteCleaner, handlegetAllCleaners, handlegetCleanerById, handleupdateCleaner } from "../Controllers/CleanerCtrls.js"
-    import { createCleanerValidator } from "../Validators/cleanerValidator.js";
+    import { createCleanerValidator, updateCleanerValidator } from "../Validators/cleanerValidator.js";
 import { validate } from "../Validators/validate.js";
 
 const router = express.Router()
@@ -77,7 +77,7 @@ const router = express.Router()
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
-router.post('/create_Cleaner/:staff_id', createCleanerValidator, validate, handlecreatecleaner)
+router.post('/create_Cleaner/:staff_id',authentication,Authorization("admin"), createCleanerValidator, validate, handlecreatecleaner)
 
 /**
  * @swagger
@@ -260,7 +260,7 @@ router.get('/one_Cleaner/:id',authentication,Authorization("cleaner", "admin"), 
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
-router.put('/update_Cleaner/:id',authentication, Authorization( "admin"), handleupdateCleaner)
+router.put('/update_Cleaner/:id',authentication, Authorization( "admin"),updateCleanerValidator, validate, handleupdateCleaner)
 
 /**
  * @swagger

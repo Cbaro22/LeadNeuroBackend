@@ -143,7 +143,7 @@ cache.set(cacheKey, responseData);
     responseData
 );
         } catch (error) {
-            next(error);
+         return   next(error);
         }
     }
 
@@ -169,11 +169,6 @@ export const handlegetDoctorById = async (req, res, next) => {
             doctor
         );
        } catch (error) {
-        console.error("FULL ERROR:", error);
-    console.error("MESSAGE:", error.message);
-    console.error("STACK:", error.stack);
-        console.log(error)
-        
          return   next(error);    
     }
 }
@@ -208,29 +203,64 @@ export const handledeleteDoctor = async (req, res, next) => {
     }
 }
 export const handleupdatedoctor = async (req, res, next) => {
-        try{const {id} = req.params;
-        const {specialization, yearsOfExperience, clinicHours,consultingDay, licenseNum} = req.body;
-        if(!mongoose.Types.ObjectId.isValid(id)){
+    try {
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
             const error = new Error("Invalid doctor ID");
             error.statusCode = 400;
             return next(error);
         }
+
         const doctor = await Doctor.findById(id);
-        if(!doctor){
+
+        if (!doctor) {
             const error = new Error("Doctor not found");
             error.statusCode = 404;
             return next(error);
         }
-        const updatedDoctor = await Doctor.findByIdAndUpdate(id, {specialization, yearsOfExperience, clinicHours,consultingDay, licenseNum}, {new: true}).populate("staff", "name email");
 
-             cache.flushAll()
+        const allowedFields = [
+            "specialization",
+            "yearsOfExperience",
+            "clinicHours",
+            "consultingDay",
+            "licenseNum"
+        ];
+
+        const updateData = {};
+
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) {
+                updateData[field] = req.body[field];
+            }
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            const error = new Error("No fields provided for update");
+            error.statusCode = 400;
+            return next(error);
+        }
+
+        const updatedDoctor = await Doctor.findByIdAndUpdate(
+            id,
+            updateData,
+            {
+                new: true,
+                runValidators: true
+            }
+        ).populate("staff", "name email");
+
+        cache.flushAll();
 
         return successResponse(
             res,
             200,
             "Doctor updated successfully",
             updatedDoctor
-        );} catch(error) {
-      return  next(error) 
-        }
+        );
+
+    } catch (error) {
+        return next(error);
     }
+};

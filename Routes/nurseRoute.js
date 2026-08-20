@@ -2,13 +2,13 @@ import express from "express"
 import {authentication, Authorization } from "../Middlewares/ValidateStaff.js"
 import { handlecreateNurse, handledeleteNurse, handlegetAllNurses, handlegetNurseById, handleUpdateNurse } from "../Controllers/NurseCtrls.js"
 import { validate } from "../Validators/validate.js"
-import { createNurseValidator } from "../Validators/nurseValidator.js"
+import { createNurseValidator, updateNurseValidator } from "../Validators/nurseValidator.js"
 const router = express.Router()
 
 
 /**
  * @swagger
- * /api/nurse/create_Nurse/{id}:
+ * /nurse/create_Nurse/{id}:
  *   post:
  *     summary: Create a nurse profile
  *     description: Creates a nurse profile for an existing staff member.
@@ -82,11 +82,11 @@ const router = express.Router()
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/create_Nurse/:id', createNurseValidator, validate, handlecreateNurse)
+router.post('/create_Nurse/:id', authentication, Authorization("admin"), createNurseValidator, validate, handlecreateNurse)
 
 /**
  * @swagger
- * /api/nurse/get_Nurses:
+ * /nurse/get_Nurses:
  *   get:
  *     summary: Get all nurses
  *     description: Retrieves a list of all registered nurses.
@@ -130,7 +130,7 @@ router.get('/get_Nurses',authentication, Authorization("admin"), handlegetAllNur
 
 /**
  * @swagger
- * /api/nurse/get_Nurse/{id}:
+ * /nurse/get_Nurse/{id}:
  *   get:
  *     summary: Get nurse by Staff ID
  *     description: Retrieves a nurse profile using the associated Staff ID.
@@ -196,7 +196,7 @@ router.get('/get_Nurse/:id',authentication, Authorization("nurse", "admin"), han
 
 /**
  * @swagger
- * /api/nurse/get_Nurses:
+ * /nurse/get_Nurses:
  *   get:
  *     summary: Get all nurses
  *     description: Retrieves a list of all registered nurses.
@@ -236,11 +236,11 @@ router.get('/get_Nurse/:id',authentication, Authorization("nurse", "admin"), han
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
-router.put('/update_Nurse/:id',authentication, Authorization( "admin"), handleUpdateNurse)
+router.put('/update_Nurse/:id',authentication, Authorization( "admin"),updateNurseValidator, validate, handleUpdateNurse)
 
 /**
  * @swagger
- * /api/nurse/delete_Nurse/{id}:
+ * /nurse/delete_Nurse/{id}:
  *   delete:
  *     summary: Delete a nurse profile
  *     description: Deletes a nurse profile using the associated Staff ID.

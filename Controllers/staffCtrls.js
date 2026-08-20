@@ -1,7 +1,3 @@
-import Staff from "../Models/Staff.js"
-import Doctor from "../Models/Doctor.js"
-import Nurse from "../Models/Nurse.js"
-
 
 import bcrypt from "bcrypt"
 import {generateAccessToken, generateRefreshToken, generateResetToken} from "../Services/tokenServices.js"
@@ -248,14 +244,10 @@ export const handleForgotPassword = async(req,res, next)=>{
     res,
     200,
     "Password reset email sent",
-    {
-        resetToken
-    }
+    
 );
     }catch(error){
 
-    console.error("LOGIN ERROR");
-    console.error(error);
     return next(error);
 }
       
@@ -337,56 +329,66 @@ const staff = await Staff.findById(id)
     
     }
 export const handleUpdateStaff = async (req, res, next) => {
-  try {
-    const { id } = req.params;
+    try {
+        const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      const error = new Error("Invalid staff ID");
-      error.statusCode = 400;
-      return next(error);
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            const error = new Error("Invalid staff ID");
+            error.statusCode = 400;
+            return next(error);
+        }
+
+        const staff = await Staff.findById(id);
+
+        if (!staff) {
+            const error = new Error("Staff not found");
+            error.statusCode = 404;
+            return next(error);
+        }
+
+        const allowedFields = [
+            "name",
+            "email",
+            "phone",
+            "Address",
+            "department",
+            "role",
+            "salary"
+        ];
+
+        const updateData = {};
+
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) {
+                updateData[field] = req.body[field];
+            }
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            const error = new Error("No valid fields provided for update");
+            error.statusCode = 400;
+            return next(error);
+        }
+
+        const updatedStaff = await Staff.findByIdAndUpdate(
+            id,
+            { $set: updateData },
+            {
+                new: true,
+                runValidators: true
+            }
+        );
+
+        cache.flushAll();
+
+        return successResponse(
+            res,
+            200,
+            "Staff updated successfully",
+            updatedStaff
+        );
+
+    } catch (error) {
+        return next(error);
     }
-
-    const staff = await Staff.findById(id);
-
-    if (!staff) {
-      const error = new Error("Staff not found");
-      error.statusCode = 404;
-      return next(error);
-    }
-
-    const {
-      name,
-      email,
-      phone,
-      Address,
-      department,
-      role,
-      salary,
-    } = req.body;
-
-    const updatedStaff = await Staff.findByIdAndUpdate(
-      id,
-      {
-        name,
-        email,
-        phone,
-        Address,
-        department,
-        role,
-        salary,
-      },
-      { new: true, runValidators: true }
-    );
-
-    cache.flushAll();
-
-    return successResponse(
-      res,
-      200,
-      "Staff updated successfully",
-      updatedStaff
-    );
-  } catch (error) {
-    return next(error);
-  }
 };

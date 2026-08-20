@@ -2,13 +2,13 @@ import express from "express"
 import { authentication, Authorization } from "../Middlewares/ValidateStaff.js"
 import { handleCreateDrug, handleDeleteDrug, handleGetAllDrugs, handleGetDrugById, handleGetDrugsByBrandAndGenericName, handleUpdateDrug } from "../Controllers/DrugCtrls.js"
 import { validate } from "../Validators/validate.js"
-import { createDrugValidator } from "../Validators/drugValidator.js"
+import { createDrugValidator, updateDrugValidator } from "../Validators/drugValidator.js"
 
 const router = express.Router()
 
 /**
  * @swagger
- * /api/drug/create_Drug:
+ * /drug/create_Drug:
  *   post:
  *     summary: Create a new drug
  *     description: Creates a new drug record in the system.
@@ -66,12 +66,15 @@ router.post('/create_Drug',authentication, Authorization("admin"), createDrugVal
 
 /**
  * @swagger
- * /api/drug/all_Drugs:
+ * /drug/all_Drugs:
  *   get:
  *     summary: Get all drugs
  *     description: Retrieves a list of all drugs available in the system.
  *     tags:
  *       - Drugs
+ * 
+ *     security:
+*       - bearerAuth: []
  *
  *     responses:
  *       200:
@@ -94,12 +97,15 @@ router.get('/all_Drugs',authentication,Authorization("admin", "doctor", "nurse")
 
 /**
  * @swagger
- * /api/drug/one_Drug/{id}:
+ * /drug/one_Drug/{id}:
  *   get:
  *     summary: Get a drug by ID
  *     description: Retrieves a single drug using its MongoDB ObjectId.
  *     tags:
  *       - Drugs
+ * 
+ *     security:
+*       - bearerAuth: []
  *
  *     parameters:
  *       - in: path
@@ -138,11 +144,12 @@ router.get('/all_Drugs',authentication,Authorization("admin", "doctor", "nurse")
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/one_Drug/:id', handleGetDrugById)
+router.get('/one_Drug/:id',authentication,
+Authorization("admin", "doctor", "nurse"), handleGetDrugById)
 
 /**
  * @swagger
- * /api/drug/update_Drug/{id}:
+ * /drug/update_Drug/{id}:
  *   put:
  *     summary: Update a drug
  *     description: Updates an existing drug using its MongoDB ObjectId.
@@ -211,11 +218,11 @@ router.get('/one_Drug/:id', handleGetDrugById)
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
-router.put('/update_Drug/:id',authentication,Authorization("admin"), handleUpdateDrug)
+router.put('/update_Drug/:id',authentication,Authorization("admin"),updateDrugValidator, validate, handleUpdateDrug)
 
 /**
  * @swagger
- * /api/drug/delete_Drug/{id}:
+ * /drug/delete_Drug/{id}:
  *   delete:
  *     summary: Delete a drug
  *     description: Deletes a drug from the inventory using its MongoDB ObjectId.
@@ -281,7 +288,7 @@ router.delete('/delete_Drug/:id',authentication,Authorization("admin"), handleDe
 
 /**
  * @swagger
- * /api/drug/search:
+ * /drug/search:
  *   get:
  *     summary: Search drugs
  *     description: Search active drugs by brand name, generic name, or both.
