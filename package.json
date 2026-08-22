@@ -1,7 +1,7 @@
 {
   "name": "leadneurobackend",
   "version": "1.0.0",
-  "description": "A RESTful healthcare management API built with Node.js, Express, and MongoDB. It provides endpoints for managing patients, doctors, appointments, and medical records, with features like authentication, validation, and error handling.",
+  "description": "A RESTful healthcare management API built with Node.js, Express, and MongoDB for managing staff, doctors, nurses, cleaners, and drugs",
   "main": "server.js",
   "type": "module",
   "scripts": {

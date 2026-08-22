@@ -52,6 +52,7 @@ describe("Create Cleaner", () => {
 
         const res = await request(app)
             .post(`/api/v1/cleaner/create_Cleaner/${cleanerStaffId}`)
+            .set("Authorization", `Bearer ${adminToken}`)
             .send({
                 shift: "Morning",
                 supervisor: "Mr James",
@@ -68,6 +69,7 @@ describe("Create Cleaner", () => {
 
         const res = await request(app)
             .post(`/api/v1/cleaner/create_Cleaner/${cleanerStaffId}`)
+            .set("Authorization", `Bearer ${adminToken}`)
             .send({});
 
         expect(res.statusCode).toBe(400);
@@ -77,6 +79,7 @@ describe("Create Cleaner", () => {
 
         const res = await request(app)
             .post("/api/v1/cleaner/create_Cleaner/123")
+            .set("Authorization", `Bearer ${adminToken}`)
             .send({
                 shift: "Morning",
                 supervisor: "Mr James",
@@ -93,6 +96,7 @@ describe("Create Cleaner", () => {
 
         const res = await request(app)
             .post(`/api/v1/cleaner/create_Cleaner/${fakeId}`)
+            .set("Authorization", `Bearer ${adminToken}`)
             .send({
                 shift: "Morning",
                 supervisor: "Mr James",
@@ -107,6 +111,7 @@ describe("Create Cleaner", () => {
 
         const res = await request(app)
             .post(`/api/v1/cleaner/create_Cleaner/${cleanerStaffId}`)
+            .set("Authorization", `Bearer ${adminToken}`)
             .send({
                 shift: "Morning",
                 supervisor: "Mr James",

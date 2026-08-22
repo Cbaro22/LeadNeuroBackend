@@ -1,7 +1,10 @@
+import crypto from "crypto";
+import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 import request from "supertest";
 import app from "../app.js";
 import Staff from "../Models/Staff.js";
+
 
 let testEmail;
 let testPassword;
@@ -143,7 +146,12 @@ describe("Forgot Password", () => {
         expect(response.body.success).toBe(true);
         expect(response.body.message).toBe("Password reset email sent");
 
-        expect(response.body.data).toHaveProperty("resetToken");
+        const staff = await Staff.findOne({ email: testEmail });
+
+        expect(staff.passwordResetToken).toBeTruthy();
+        expect(staff.passwordResetExpires).toBeTruthy();
+        expect(staff.passwordResetExpires.getTime())
+            .toBeGreaterThan(Date.now());
 
     });
 
@@ -153,16 +161,21 @@ describe("Reset Password", () => {
 
     test("should reset password successfully", async () => {
 
-        // Generate a reset token first
-        const forgot = await request(app)
-            .post("/api/v1/staff/Forgot_password")
-            .send({
-                email: testEmail
-            });
+        const token = crypto.randomBytes(32).toString("hex");
 
-        const token = forgot.body.data.resetToken;
+        const hashedToken = crypto
+            .createHash("sha256")
+            .update(token)
+            .digest("hex");
 
-        // Reset the password
+        await Staff.findOneAndUpdate(
+            { email: testEmail },
+            {
+                passwordResetToken: hashedToken,
+                passwordResetExpires: Date.now() + 10 * 60 * 1000
+            }
+        );
+
         const response = await request(app)
             .patch("/api/v1/staff/reset_password")
             .send({
@@ -176,7 +189,18 @@ describe("Reset Password", () => {
         expect(response.body.message)
             .toBe("Password reset successful");
 
-        // Update the password variable so subsequent login tests use it
+        const staff = await Staff.findOne({ email: testEmail });
+
+        expect(staff.passwordResetToken).toBeUndefined();
+        expect(staff.passwordResetExpires).toBeUndefined();
+
+        const passwordMatches = await bcrypt.compare(
+            "NewPassword2026#",
+            staff.password
+        );
+
+        expect(passwordMatches).toBe(true);
+
         testPassword = "NewPassword2026#";
 
     });

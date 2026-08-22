@@ -232,7 +232,7 @@ describe("Search Drugs", () => {
             .set("Authorization", `Bearer ${token}`);
 
         expect(res.statusCode).toBe(400);
-        expect(res.body.message).toBe("brand or generic name is required ");
+        expect(res.body.message).toBe("Brand name or generic name is required");
     });
 
 });

@@ -1,5 +1,6 @@
 
 import bcrypt from "bcrypt"
+import Staff from "../Models/Staff.js"
 import {generateAccessToken, generateRefreshToken, generateResetToken} from "../Services/tokenServices.js"
 import { deleteAccountEmail, forgotPasswordEmail, loginEmail, registerationEmail, resetPasswordEmail } from "../Services/emailServices.js"
 
@@ -28,6 +29,7 @@ export const handleCreateStaff = async(req,res,next)=>{
         const error = new Error("Staff Account already exists");
         error.statusCode = 409;
         return next(error);
+        
     }
        
     const hashedPassword = await bcrypt.hash(password,10)
@@ -50,6 +52,7 @@ export const handleCreateStaff = async(req,res,next)=>{
     }
 );
     } catch (error) {
+        console.error("REGISTER ERROR:", error);
        return next(error)
     }
 }
