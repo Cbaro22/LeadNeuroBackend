@@ -14,8 +14,6 @@ const app = express();
 
 app.use(helmet());
 
-app.use(limiter);
-
 app.use(cors(corsOptions));
 
 app.use(express.json());
@@ -32,7 +30,7 @@ app.get("/api/v1", (req, res) => {
     });
 });
 
-app.use("/api/v1", routes);
+app.use("/api/v1", limiter, routes);
 
 app.use(
     "/api-docs",
