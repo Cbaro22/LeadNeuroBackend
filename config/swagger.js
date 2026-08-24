@@ -1848,7 +1848,7 @@ DeleteDrugResponse: {
     }
   },
 
-  apis: ["./Routes/drugRoute.js"]
+  apis: ["./Routes/*.js"]
 };
 
 const swaggerSpec = swaggerJSDoc(options);
