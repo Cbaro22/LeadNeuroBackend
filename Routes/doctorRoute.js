@@ -131,7 +131,7 @@ router.get('/get_Doctors',authentication,Authorization("admin", "doctor"), handl
  *     summary: Retrieve a doctor by ID
  *     description: Retrieves a single doctor's profile, including the associated staff information. Accessible by administrators and doctors.
  *     tags:
- *       - Doctor
+ *       - Doctors
  *
  *     security:
  *       - bearerAuth: []
@@ -198,7 +198,7 @@ router.get('/get_Doctor/:id',authentication,Authorization("admin", "doctor"), ha
  *     summary: Delete a doctor profile
  *     description: Deletes a doctor's profile from the system. Only administrators can perform this operation.
  *     tags:
- *       - Doctor
+ *       - Doctors
  *
  *     security:
  *       - bearerAuth: []
@@ -265,7 +265,7 @@ router.delete('/delete_Doctor/:id',authentication,Authorization("admin"), handle
  *     summary: Update a doctor's profile
  *     description: Updates an existing doctor's profile. Only administrators can perform this operation.
  *     tags:
- *       - Doctor
+ *       - Doctors
  *
  *     security:
  *       - bearerAuth: []
