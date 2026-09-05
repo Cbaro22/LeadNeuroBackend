@@ -14,7 +14,7 @@ const router = express.Router()
  *     summary: Create doctor profile
  *     description: Creates a doctor profile for an existing staff member. Only administrators can perform this operation.
  *     tags:
- *       - Doctor
+ *       - Doctors
  *
  *     security:
  *       - bearerAuth: []
@@ -87,7 +87,7 @@ router.post('/create_Doctor/:id',authentication,Authorization("admin"), createDo
  *     summary: Retrieve all doctors
  *     description: Returns a list of all registered doctors along with their associated staff information. Only administrators can access this endpoint.
  *     tags:
- *       - Doctor
+ *       - Doctors
  *
  *     security:
  *       - bearerAuth: []

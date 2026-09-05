@@ -34,18 +34,18 @@ const router = express.Router()
  *             $ref: '#/components/schemas/CreateNurseRequest'
  *
  *     responses:
- *       201:
- *         description: Nurse profile created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Nurse data created successfully
- *                 nurse:
- *                   $ref: '#/components/schemas/CreateNurseResponse'
+  201:
+    description: Nurse profile created successfully
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Nurse data created successfully
+            nurse:
+              $ref: '#/components/schemas/CreateNurseResponse'
  *
  *       400:
  *         description: Validation error or nurse already exists
@@ -196,23 +196,46 @@ router.get('/get_Nurse/:id',authentication, Authorization("nurse", "admin"), han
 
 /**
  * @swagger
- * /nurse/get_Nurses:
- *   get:
- *     summary: Get all nurses
- *     description: Retrieves a list of all registered nurses.
+ * /nurse/update_Nurse/{id}:
+ *   put:
+ *     summary: Update a nurse profile
+ *     description: Updates a nurse profile using the associated Staff ID.
  *     tags:
  *       - Nurses
  *
  *     security:
  *       - bearerAuth: []
  *
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Staff ObjectId associated with the nurse.
+ *         schema:
+ *           type: string
+ *           example: 686f6b8d2b45d12e85d88d1a
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateNurseRequest'
+ *
  *     responses:
  *       200:
- *         description: List of nurses retrieved successfully
+ *         description: Nurse updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/GetAllNursesResponse'
+ *               $ref: '#/components/schemas/UpdateNurseResponse'
+ *
+ *       400:
+ *         description: Invalid Staff ID or no fields provided for update
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *
  *       401:
  *         description: Unauthorized
@@ -223,6 +246,13 @@ router.get('/get_Nurse/:id',authentication, Authorization("nurse", "admin"), han
  *
  *       403:
  *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *
+ *       404:
+ *         description: Nurse not found
  *         content:
  *           application/json:
  *             schema:

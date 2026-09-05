@@ -1019,6 +1019,250 @@ Nurse: {
   }
 },
 
+CreateNurseRequest: {
+  type: "object",
+
+  required: [
+    "certification",
+    "wardAssigned",
+    "shift",
+    "yearsOfExperience",
+    "licenseNum",
+    "supervisor"
+  ],
+
+  properties: {
+    certification: {
+      type: "string",
+      enum: ["RN", "LPN", "CNA", "BscN"],
+      example: "RN"
+    },
+
+    wardAssigned: {
+      type: "string",
+      example: "ICU"
+    },
+
+    shift: {
+      type: "string",
+      enum: ["Morning", "Afternoon", "Night"],
+      example: "Morning"
+    },
+
+    yearsOfExperience: {
+      type: "integer",
+      minimum: 0,
+      example: 8
+    },
+
+    licenseNum: {
+      type: "string",
+      example: "NMCN/123456"
+    },
+
+    supervisor: {
+      type: "string",
+      example: "Dr. John Doe"
+    }
+  }
+},
+
+CreateNurseResponse: {
+  type: "object",
+
+  properties: {
+    success: {
+      type: "boolean",
+      example: true
+    },
+
+    message: {
+      type: "string",
+      example: "Nurse data created successfully"
+    },
+
+    data: {
+      $ref: "#/components/schemas/Nurse"
+    }
+  }
+},
+
+GetAllNursesResponse: {
+  type: "object",
+
+  properties: {
+    success: {
+      type: "boolean",
+      example: true
+    },
+
+    message: {
+      type: "string",
+      example: "List of nurses"
+    },
+
+    data: {
+      type: "object",
+
+      properties: {
+        currentPage: {
+          type: "integer",
+          example: 1
+        },
+
+        totalPages: {
+          type: "integer",
+          example: 5
+        },
+
+        limit: {
+          type: "integer",
+          example: 10
+        },
+
+        totalItems: {
+          type: "integer",
+          example: 48
+        },
+
+        hasNextPage: {
+          type: "boolean",
+          example: true
+        },
+
+        hasPreviousPage: {
+          type: "boolean",
+          example: false
+        },
+
+        nextPage: {
+          type: "integer",
+          nullable: true,
+          example: 2
+        },
+
+        previousPage: {
+          type: "integer",
+          nullable: true,
+          example: null
+        },
+
+        totalNurses: {
+          type: "integer",
+          example: 48
+        },
+
+        nurses: {
+          type: "array",
+
+          items: {
+            $ref: "#/components/schemas/Nurse"
+          }
+        }
+      }
+    }
+  }
+},
+
+GetNurseResponse: {
+  type: "object",
+
+  properties: {
+    success: {
+      type: "boolean",
+      example: true
+    },
+
+    message: {
+      type: "string",
+      example: "Nurse retrieved successfully"
+    },
+
+    data: {
+      $ref: "#/components/schemas/Nurse"
+    }
+  }
+},
+
+UpdateNurseRequest: {
+  type: "object",
+
+  properties: {
+    certification: {
+      type: "string",
+      enum: ["RN", "LPN", "CNA", "BscN"],
+      example: "RN"
+    },
+
+    wardAssigned: {
+      type: "string",
+      example: "Emergency Ward"
+    },
+
+    shift: {
+      type: "string",
+      enum: ["Morning", "Afternoon", "Night"],
+      example: "Afternoon"
+    },
+
+    yearsOfExperience: {
+      type: "integer",
+      minimum: 0,
+      example: 10
+    },
+
+    licenseNum: {
+      type: "string",
+      example: "NMCN/654321"
+    },
+
+    supervisor: {
+      type: "string",
+      example: "Dr. Jane Doe"
+    }
+  }
+},
+
+UpdateNurseResponse: {
+  type: "object",
+
+  properties: {
+    success: {
+      type: "boolean",
+      example: true
+    },
+
+    message: {
+      type: "string",
+      example: "Nurse updated successfully"
+    },
+
+    data: {
+      $ref: "#/components/schemas/Nurse"
+    }
+  }
+},
+
+DeleteNurseResponse: {
+  type: "object",
+
+  properties: {
+    success: {
+      type: "boolean",
+      example: true
+    },
+
+    message: {
+      type: "string",
+      example: "Nurse deleted successfully"
+    },
+
+    data: {
+      $ref: "#/components/schemas/Nurse"
+    }
+  }
+},
+
 Cleaner: {
   type: "object",
 
